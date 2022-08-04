@@ -20,10 +20,11 @@ function _Interface(
         return {
             "variables": tree.variables
             , "type": tree.type
-            , "execute": function execute(context) {
+            , "execute": function execute(context, options) {
                 return expression_executor(
                     tree
                     , context
+                    , options
                 );
             }
         };
