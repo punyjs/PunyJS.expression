@@ -13,12 +13,12 @@
         , "eval": ["+eval"]
     }]
     , "errors": [
-        ":PunyJS.ui.gui.expression.Errors"
+        ":PunyJS.expression.Errors"
         , {"conflictResolution":"error"}
     ]
     , "expression": [{
-        "parser": [":PunyJS.ui.gui.expression._Parser",[]]
-        , "executor": [":PunyJS.ui.gui.expression._Executor",[]]
-        , "interface": [":PunyJS.ui.gui.expression._Interface",[]]
+        "parser": [":PunyJS.expression._Parser",[]]
+        , "executor": [":PunyJS.expression._Executor",[]]
+        , "interface": [":PunyJS.expression._Interface",[]]
     }]
 }

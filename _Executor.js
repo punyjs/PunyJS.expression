@@ -21,30 +21,34 @@ function _Executor(
         return handleType(
             expressionTree
             , context
+            , options
         );
     }
 
     /**
     * @function
     */
-    function handleType(treeNode, context) {
+    function handleType(treeNode, context, options) {
         switch(treeNode.type) {
             case "chain":
                 return handleChain(
                     treeNode
                     , context
+                    , options
                 );
                 break;
             case "conditional":
                 return handleConditional(
                     treeNode
                     , context
+                    , options
                 );
                 break;
             case "iterator":
                 return handleIterator(
                     treeNode
                     , context
+                    , options
                 );
                 break;
             case "literal":
@@ -54,30 +58,35 @@ function _Executor(
                 return handleVariable(
                     treeNode
                     , context
+                    , options
                 );
                 break;
             case "execution":
                 return handleExecution(
                     treeNode
                     , context
+                    , options
                 );
                 break;
             case "bind":
                 return handleBind(
                     treeNode
                     , context
+                    , options
                 );
                 break;
             case "array":
                 return handleArray(
                     treeNode
                     , context
+                    , options
                 );
                 break;
             case "object":
                 return handleObject(
                     treeNode
                     , context
+                    , options
                 );
                 break;
             case "type":
@@ -85,7 +94,7 @@ function _Executor(
                 break;
             default:
                 throw new Error(
-                    `${errors.ui.gui.expression.invalid_expression_type} (${treeNode.type})`
+                    `${errors.expression.invalid_expression_type} (${treeNode.type})`
                 );
                 break;
         }
@@ -93,7 +102,7 @@ function _Executor(
     /**
     * @function
     */
-    function handleChain(treeNode, context) {
+    function handleChain(treeNode, context, options) {
         var lastResult, hasResult = false, operator;
         //loop through the sections
         treeNode.sections
@@ -113,6 +122,7 @@ function _Executor(
                     result = handleType(
                         section
                         , context
+                        , options
                     );
                     hasResult = true;
                 }
@@ -136,14 +146,16 @@ function _Executor(
     /**
     * @function
     */
-    function handleConditional(treeNode, context) {
+    function handleConditional(treeNode, context, options) {
         var sideA = handleType(
             treeNode.sideA
             , context
+            , options
         )
         , sideB = handleType(
             treeNode.sideB
             , context
+            , options
         )
         , op = treeNode.operator
         ;
@@ -204,10 +216,11 @@ function _Executor(
     /**
     * @function
     */
-    function handleIterator(treeNode, context) {
+    function handleIterator(treeNode, context, options) {
         var result = handleType(
             treeNode.collection
             , context
+            , options
         )
         , set = treeNode.operator === "in"
             ? result
@@ -227,6 +240,7 @@ function _Executor(
             , filter
             , treeNode.lookup
             , context
+            , options
         )
         , keys = Object.keys(coll)
         , indx = 0
@@ -317,7 +331,7 @@ function _Executor(
     * Filters the collection or array
     * @function
     */
-    function filterCollection(coll, filter, vars, context) {
+    function filterCollection(coll, filter, vars, context, options) {
         if (!!coll && !!filter) {
             var keys = Object.keys(coll)
             , isAr = is_array(coll)
@@ -342,6 +356,7 @@ function _Executor(
                     result = handleType(
                         filter
                         , data
+                        , options
                     );
 
                     if (!!result) {
@@ -358,14 +373,18 @@ function _Executor(
     /**
     * @function
     */
-    function handleVariable(treeNode, context) {
+    function handleVariable(treeNode, context, options) {
         var ref = utils_reference(
             treeNode.path
             , context
         );
         if (!ref.found) {
+            //if this is a quiet fail then return an empty string
+            if (!!options && options.quiet === true) {
+                return "";
+            }
             throw new Error(
-                `${errors.ui.gui.expression.variable_not_found} ("${treeNode.path}")`
+                `${errors.expression.variable_not_found} ("${treeNode.path}")`
             );
         }
         return ref.value;
@@ -373,7 +392,7 @@ function _Executor(
     /**
     * @function
     */
-    function handleExecution(treeNode, context) {
+    function handleExecution(treeNode, context, options) {
         var fnRef = utils_reference(
             treeNode.path
             , context
@@ -385,16 +404,17 @@ function _Executor(
             return handleType(
                 arg
                 , context
+                , options
             );
         });
         if (!fnRef.found) {
             throw new Error(
-                `${errors.ui.gui.expression.function_not_found} (${treeNode.path})`
+                `${errors.expression.function_not_found} (${treeNode.path})`
             );
         }
         if(!is_func(fn)) {
             throw new Error(
-                `${errors.ui.gui.expression.function_invalid} (${treeNode.path} ${typeof fn})`
+                `${errors.expression.function_invalid} (${treeNode.path} ${typeof fn})`
             );
         }
         //execute the function
@@ -403,7 +423,7 @@ function _Executor(
     /**
     * @function
     */
-    function handleBind(treeNode, context) {
+    function handleBind(treeNode, context, options) {
         var fnRef = utils_reference(
             treeNode.path
             , context
@@ -416,17 +436,18 @@ function _Executor(
                 return handleType(
                     arg
                     , context
+                    , options
                 );
             }
         );
         if (!fnRef.found) {
             throw new Error(
-                `${errors.ui.gui.expression.function_not_found} (${treeNode.path})`
+                `${errors.expression.function_not_found} (${treeNode.path})`
             );
         }
         if(!is_func(fn)) {
             throw new Error(
-                `${errors.ui.gui.expression.function_invalid} (${treeNode.path} ${typeof fn})`
+                `${errors.expression.function_invalid} (${treeNode.path} ${typeof fn})`
             );
         }
         return fn.bind.apply(fn, [null].concat(args));
@@ -434,13 +455,14 @@ function _Executor(
     /**
     * @function
     */
-    function handleArray(treeNode, context) {
+    function handleArray(treeNode, context, options) {
         return treeNode.members
         .map(
             function mapMember(member) {
                 return handleType(
                     member
                     , context
+                    , options
                 );
             }
         );
@@ -448,7 +470,7 @@ function _Executor(
     /**
     * @function
     */
-    function handleObject(treeNode, context) {
+    function handleObject(treeNode, context, options) {
         var obj = {};
 
         Object.keys(treeNode.properties)
@@ -458,6 +480,7 @@ function _Executor(
                 , result = handleType(
                     property
                     , context
+                    , options
                 );
                 obj[key] = result;
             }
