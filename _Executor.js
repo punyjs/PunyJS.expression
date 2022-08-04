@@ -17,7 +17,7 @@ function _Executor(
     /**
     * @worker
     */
-    function Executor(expressionTree, context) {
+    function Executor(expressionTree, context, options) {
         return handleType(
             expressionTree
             , context
