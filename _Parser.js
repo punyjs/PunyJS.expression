@@ -93,7 +93,7 @@ function _Parser(
     * A regular expression pattern to match literal expressions
     * @property
     */
-    , LITERAL_PATT = /^(?:('[^']+'|"[^"]+"|`[^`]+`|(?:0x)?[0-9.-]+)|true|false|null|undefined)$/
+    , LITERAL_PATT = /^(?:('[^']*'|"[^"]*"|`[^`]*`|(?:0x)?[0-9.-]+)|true|false|null|undefined)$/
     /**
     * A regular expression pattern to match function patterns in expressions.
     * @property
