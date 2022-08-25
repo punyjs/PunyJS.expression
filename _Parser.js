@@ -346,7 +346,7 @@ function _Parser(
             }
             else {
                 throw new Error(
-                    `${errors.ui.gui.expression.invalid_expression} ("${expressionStr}")`
+                    `${errors.expression.invalid_expression} ("${expressionStr}")`
                 );
             }
         }
