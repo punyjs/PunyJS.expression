@@ -5,10 +5,12 @@
 function _Executor(
     utils_getType
     , utils_reference
+    , utils_regExp
     , is_func
     , is_object
     , is_array
     , is_numeric
+    , is_regexp
     , errors
 ) {
 
@@ -91,6 +93,16 @@ function _Executor(
                 break;
             case "type":
                 return treeNode.value;
+                break;
+            case "regex":
+                return treeNode.pattern;
+                break;
+            case "match":
+                return handleMatch(
+                    treeNode
+                    , context
+                    , options
+                );
                 break;
             default:
                 throw new Error(
@@ -191,9 +203,15 @@ function _Executor(
                 return sideA !== utils_getType(sideB);
                 break;
             case "isin":
+                //if sideB is an object then see if the sideA value is in it
                 if (is_object(sideB)) {
                     return sideA in sideB;
                 }
+                //if the sideB is regex then return if sideA matches the pattern
+                else if (is_regexp(sideB)) {
+                    return !!sideA.match(sideB);
+                }
+                //otherwise return if sideA has an index in sideB
                 else {
                     return sideB.indexOf(sideA) !== -1
                 }
@@ -201,6 +219,10 @@ function _Executor(
             case "!isin":
                 if (is_object(sideB)) {
                     return !(sideA in sideB);
+                }
+                //if the sideB is regex then return if sideA matches the pattern
+                else if (is_regexp(sideB)) {
+                    return !sideA.match(sideB);
                 }
                 else {
                     return sideB.indexOf(sideA) === -1
@@ -314,6 +336,22 @@ function _Executor(
                 }
             }
         });
+    }
+    /**
+    * @function
+    */
+    function handleMatch(treeNode, context, options) {
+        var value = handleType(
+            treeNode.value
+            , context
+            , options
+        )
+        , matches = utils_regExp.getMatches(
+            treeNode.regexp.pattern
+            , value
+        );
+
+        return matches;
     }
     /**
     * Filters the collection or array

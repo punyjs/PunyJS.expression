@@ -80,15 +80,25 @@ function _Parser(
     */
     , TYPE_PATT = /^\[([a-z]+)\]$/
     /**
+    * A regular expression pattern for matching the regexp pattern
+    * @property
+    */
+    , REGEXP_PATT = /^(?<!\/)\/(.+)(?<!\/)\/([gimyusd]+)$/
+    /**
+    * A regular expression pattern for matching a regexp match pattern
+    * @property
+    */
+    , MATCH_PATT = /^([\-A-Za-z0-9$.,()\[\]_\ '"`]+)(?:(?<!\/)\/(.+)(?<!\/)\/([gimyusd]+))$/
+    /**
     * A regular expression pattern to match conditional expressions
     * @property
     */
-    , COND_PATT = /^([\-A-Za-z0-9$.,()\[\]_\ '"`]+) (is|!is|isin|!isin|==|>|<|!=|>=|<=|!==|===) ([\-A-Za-z0-9$.,()\[\]_\ '"`]+)$/i
+    , COND_PATT =  /^([\-A-Za-z0-9$.,()\[\]_\ '"`]+) (is|!is|isin|!isin|==|>|<|!=|>=|<=|!==|===) ([A-z0-9$.,()\[\]_\\ \/\-'"`]+|(?<!\/)\/.+(?<!\/)\/[gimyusd]+)$/i
     /**
     * A regular expression pattern to match iterator expressions
     * @property
     */
-    , ITER_PATT = /^([A-Za-z0-9$_]+)(?:, ?([A-Za-z0-9$_]+))?(?:, ?([A-Za-z0-9$_]+))? (in|for) ([A-Za-z0-9.()'"`\[\],$_\{\} :]+)(?: sort ([A-z0-9$._\[\]]+)(?: (desc|asc))?)?(?: filter (.+))?$/i
+    , ITER_PATT = /^([A-Za-z0-9$_]+)(?:, ?([A-Za-z0-9$_]+))?(?:, ?([A-Za-z0-9$_]+))? (in|for) ([A-Za-z0-9.()'"`\[\],$_\{\} :]+|[\-A-Za-z0-9$.,()\[\]_\ '"`]+(?<!\/)\/.+(?<!\/)\/[gimyusd]+)(?: sort ([A-z0-9$._\[\]]+)(?: (desc|asc))?)?(?: filter (.+))?$/i
     /**
     * A regular expression pattern to match literal expressions
     * @property
@@ -205,6 +215,15 @@ function _Parser(
             return parseConditional(
                 variables
                 , match
+            );
+        }
+        //perhaps a regexp match
+        else if (!!(match = MATCH_PATT.exec(expressionStr))) {
+            return parseRegExpMatch(
+                variables
+                , match[1]
+                , match[2]
+                , match[3]
             );
         }
         //otherwise its a value expression
@@ -333,8 +352,16 @@ function _Parser(
                     , match[0]
                 );
             }
+            //or regular expressions
+            else if (!!(match = REGEXP_PATT.exec(expressionStr))) {
+                return parseRegExp(
+                    variables
+                    , match[1]
+                    , match[2]
+                );
+            }
             //or a varaible path
-            else if(!!VAR_PATT.exec(expressionStr)) {
+            else if (!!VAR_PATT.exec(expressionStr)) {
                 addVariables(
                     variables
                     , expressionStr
@@ -495,6 +522,36 @@ function _Parser(
                 treeNode.properties[key] = expr;
             }
         );
+
+        return treeNode;
+    }
+    /**
+    * @function
+    */
+    function parseRegExpMatch(variables, lookup, pattern, flags) {
+        var treeNode = {
+            "type": "match"
+            , "value": parseValueExpression(
+                variables
+                , lookup
+            )
+            , "regexp": parseRegExp(
+                variables
+                , pattern
+                , flags
+            )
+        };
+
+        return treeNode;
+    }
+    /**
+    * @function
+    */
+    function parseRegExp(variables, regExp, flags) {
+        var treeNode = {
+            "type": "regex"
+            , "pattern": new RegExp(regExp, flags)
+        };
 
         return treeNode;
     }

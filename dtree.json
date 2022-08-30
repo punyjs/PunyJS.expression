@@ -6,10 +6,12 @@
         , "object": [":PunyJS.core.is.Object"]
         , "numeric": [":PunyJS.core.is.Numeric"]
         , "string": [":PunyJS.core.is.String"]
+        , "regexp": [":PunyJS.core.is.RegExp"]
     }]
     , "utils": [{
         "getType": [":PunyJS.core.utils.GetType"]
         , "reference": [":PunyJS.core.object.Reference"]
+        , "regExp": [":PunyJS.core.regexp._RegExp",[]]
         , "eval": ["+eval"]
     }]
     , "errors": [

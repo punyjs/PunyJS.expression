@@ -1,6 +1,6 @@
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Parser: iterator in
+*   @title PunyJS.expression._Parser: iterator in
 */
 function expressionParserTest1(
     controller
@@ -11,7 +11,7 @@ function expressionParserTest1(
         async function arrangeFn() {
             expressionParser = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Parser"
+                    ":PunyJS.expression._Parser"
                     , [
 
                     ]
@@ -41,7 +41,7 @@ function expressionParserTest1(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Parser: iterator for
+*   @title PunyJS.expression._Parser: iterator for
 */
 function expressionParserTest2(
     controller
@@ -52,7 +52,7 @@ function expressionParserTest2(
         async function arrangeFn() {
             expressionParser = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Parser"
+                    ":PunyJS.expression._Parser"
                     , [
 
                     ]
@@ -82,7 +82,7 @@ function expressionParserTest2(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Parser: conditional isin
+*   @title PunyJS.expression._Parser: conditional isin
 */
 function expressionParserTest3(
     controller
@@ -93,7 +93,7 @@ function expressionParserTest3(
         async function arrangeFn() {
             expressionParser = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Parser"
+                    ":PunyJS.expression._Parser"
                     , [
 
                     ]
@@ -123,7 +123,7 @@ function expressionParserTest3(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Parser: conditional is
+*   @title PunyJS.expression._Parser: conditional is
 */
 function expressionParserTest4(
     controller
@@ -134,7 +134,7 @@ function expressionParserTest4(
         async function arrangeFn() {
             expressionParser = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Parser"
+                    ":PunyJS.expression._Parser"
                     , [
 
                     ]
@@ -164,7 +164,7 @@ function expressionParserTest4(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Parser: variable
+*   @title PunyJS.expression._Parser: variable
 */
 function expressionParserTest5(
     controller
@@ -175,7 +175,7 @@ function expressionParserTest5(
         async function arrangeFn() {
             expressionParser = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Parser"
+                    ":PunyJS.expression._Parser"
                     , [
 
                     ]
@@ -205,7 +205,7 @@ function expressionParserTest5(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Parser: bind operation
+*   @title PunyJS.expression._Parser: bind operation
 */
 function expressionParserTest6(
     controller
@@ -216,7 +216,7 @@ function expressionParserTest6(
         async function arrangeFn() {
             expressionParser = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Parser"
+                    ":PunyJS.expression._Parser"
                     , [
 
                     ]
@@ -246,7 +246,7 @@ function expressionParserTest6(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Parser: function execution
+*   @title PunyJS.expression._Parser: function execution
 */
 function expressionParserTest7(
     controller
@@ -257,7 +257,7 @@ function expressionParserTest7(
         async function arrangeFn() {
             expressionParser = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Parser"
+                    ":PunyJS.expression._Parser"
                     , [
 
                     ]
@@ -287,7 +287,7 @@ function expressionParserTest7(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Parser: chaining
+*   @title PunyJS.expression._Parser: chaining
 */
 function expressionParserTest8(
     controller
@@ -298,7 +298,7 @@ function expressionParserTest8(
         async function arrangeFn() {
             expressionParser = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Parser"
+                    ":PunyJS.expression._Parser"
                     , [
 
                     ]
@@ -328,7 +328,7 @@ function expressionParserTest8(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Parser: variable extraction
+*   @title PunyJS.expression._Parser: variable extraction
 */
 function expressionParserTest9(
     controller
@@ -339,7 +339,7 @@ function expressionParserTest9(
         async function arrangeFn() {
             expressionParser = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Parser"
+                    ":PunyJS.expression._Parser"
                     , [
 
                     ]
@@ -363,6 +363,160 @@ function expressionParserTest9(
             .value(expressionTree, "variables")
             .stringify()
             .equals('["state._index","context.$mask.$every","context.$mask","state.list.$every._display","state.list.$every","state.list"]')
+            ;
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.expression._Parser: regex conditional
+*/
+function expressionParserTest10(
+    controller
+) {
+    var expressionParser, expressionTree, expression;
+
+    arrange(
+        async function arrangeFn() {
+            expressionParser = await controller(
+                [
+                    ":PunyJS.expression._Parser"
+                    , [
+
+                    ]
+                ]
+            );
+            expression = "app.path.variable isin /[.]path[.]([A-z0-9\-_$]+)([.].+)?$/im";
+        }
+    );
+
+    act(
+        function actFn() {
+            expressionTree = expressionParser(
+                expression
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The expression tree variable should be")
+            .value(expressionTree, "variables")
+            .stringify()
+            .equals(`["app.path.variable"]`)
+            ;
+
+            test("The expressionTree.sideB.type should be")
+            .value(expressionTree, "sideB.type")
+            .equals("regex")
+            ;
+
+            test("The expressionTree.sideB.pattern should be")
+            .value(expressionTree, "sideB.pattern")
+            .toString()
+            .equals("/[.]path[.]([A-z0-9-_$]+)([.].+)?$/im")
+            ;
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.expression._Parser: regex match
+*/
+function expressionParserTest11(
+    controller
+) {
+    var expressionParser, expressionTree, expression;
+
+    arrange(
+        async function arrangeFn() {
+            expressionParser = await controller(
+                [
+                    ":PunyJS.expression._Parser"
+                    , [
+
+                    ]
+                ]
+            );
+            expression = "app.path.variable/[.]path[.]([A-z0-9\-_$]+)([.].+)?$/i";
+        }
+    );
+
+    act(
+        function actFn() {
+            expressionTree = expressionParser(
+                expression
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The expression tree variable should be")
+            .value(expressionTree, "variables")
+            .stringify()
+            .equals(`["app.path.variable"]`)
+            ;
+
+            test("The expressionTree.type should be")
+            .value(expressionTree, "type")
+            .equals("match")
+            ;
+
+            test("The expressionTree.regexp.pattern should be")
+            .value(expressionTree, "regexp.pattern")
+            .toString()
+            .equals("/[.]path[.]([A-z0-9-_$]+)([.].+)?$/i")
+            ;
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.expression._Parser: regex iterator
+*/
+function expressionParserTest12(
+    controller
+) {
+    var expressionParser, expressionTree, expression;
+
+    arrange(
+        async function arrangeFn() {
+            expressionParser = await controller(
+                [
+                    ":PunyJS.expression._Parser"
+                    , []
+                ]
+            );
+            expression = "$key,$i,$match in app.path.variable/[.]path[.]([A-z0-9\-_$]+)([.].+)?$/i";
+        }
+    );
+
+    act(
+        function actFn() {
+            expressionTree = expressionParser(
+                expression
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The expression tree variables should be")
+            .value(expressionTree, "variables")
+            .stringify()
+            .equals(`["app.path.variable"]`)
+            ;
+
+            test("The expression tree type should be")
+            .value(expressionTree, "type")
+            .equals(`iterator`)
+            ;
+
+            test("The expression tree collection should be")
+            .value(expressionTree, "collection")
+            .stringify()
+            .equals(`{"type":"match","value":{"type":"variable","path":"app.path.variable"},"regexp":{"type":"regex","pattern":{}}}`)
             ;
         }
     );

@@ -1,6 +1,6 @@
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Interface: functional test, in loop
+*   @title PunyJS.expression._Interface: functional test, in loop
 */
 function expressionInterfaceTest1(
     controller
@@ -12,7 +12,7 @@ function expressionInterfaceTest1(
         async function arrangeFn() {
             expressionInterface = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Interface"
+                    ":PunyJS.expression._Interface"
                     , [
 
                     ]
@@ -93,7 +93,7 @@ function expressionInterfaceTest1(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Interface: functional test, conditional
+*   @title PunyJS.expression._Interface: functional test, conditional
 */
 function expressionInterfaceTest2(
     controller
@@ -105,7 +105,7 @@ function expressionInterfaceTest2(
         async function arrangeFn() {
             expressionInterface = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Interface"
+                    ":PunyJS.expression._Interface"
                     , []
                 ]
             );
@@ -152,7 +152,7 @@ function expressionInterfaceTest2(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Interface: functional test, conditional
+*   @title PunyJS.expression._Interface: functional test, conditional
 */
 function expressionInterfaceTest3(
     controller
@@ -164,7 +164,7 @@ function expressionInterfaceTest3(
         async function arrangeFn() {
             expressionInterface = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Interface"
+                    ":PunyJS.expression._Interface"
                     , []
                 ]
             );
