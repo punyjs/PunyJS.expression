@@ -197,10 +197,10 @@ function _Executor(
                 return sideA <= sideB;
                 break;
             case "is":
-                return sideA === utils_getType(sideB);
+                return utils_getType(sideA) === sideB;
                 break;
             case "!is":
-                return sideA !== utils_getType(sideB);
+                return utils_getType(sideA) !== sideB;
                 break;
             case "isin":
                 //if sideB is an object then see if the sideA value is in it
