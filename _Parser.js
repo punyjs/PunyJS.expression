@@ -88,7 +88,7 @@ function _Parser(
     * A regular expression pattern for matching a regexp match pattern
     * @property
     */
-    , MATCH_PATT = /^([\-A-Za-z0-9$.,()\[\]_\ '"`]+)(?:(?<!\/)\/(.+)(?<!\/)\/([gimyusd]+))$/
+    , MATCH_PATT = /^([\-A-Za-z0-9$.,()\[\]_\ '"`]+)(?:(?<!\/)\/(.+)(?<!\/)\/([gimyusd]*))$/
     /**
     * A regular expression pattern to match conditional expressions
     * @property
