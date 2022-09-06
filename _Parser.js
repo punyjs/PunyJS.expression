@@ -83,7 +83,7 @@ function _Parser(
     * A regular expression pattern for matching the regexp pattern
     * @property
     */
-    , REGEXP_PATT = /^(?<!\/)\/(.+)(?<!\/)\/([gimyusd]+)$/
+    , REGEXP_PATT = /^(?<!\/)\/(.+)(?<!\/)\/([gimyusd]*)$/
     /**
     * A regular expression pattern for matching a regexp match pattern
     * @property
