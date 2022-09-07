@@ -104,6 +104,13 @@ function _Executor(
                     , options
                 );
                 break;
+            case "not":
+                return handleNot(
+                    treeNode
+                    , context
+                    , options
+                );
+                break;
             default:
                 throw new Error(
                     `${errors.expression.invalid_expression_type} (${treeNode.type})`
@@ -525,5 +532,20 @@ function _Executor(
         );
 
         return obj;
+    }
+    /**
+    * @function
+    */
+    function handleNot(treeNode, context, options) {
+        var exprResults = handleType(
+            treeNode.expression
+            , context
+            , options
+        );
+
+        if (treeNode.not === "!!") {
+            return !!exprResults;
+        }
+        return !exprResults;
     }
 }

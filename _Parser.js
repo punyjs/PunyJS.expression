@@ -90,6 +90,11 @@ function _Parser(
     */
     , MATCH_PATT = /^([\-A-Za-z0-9$.,()\[\]_\ '"`]+)(?:(?<!\/)\/(.+)(?<!\/)\/([gimyusd]*))$/
     /**
+    * A regular expression pattern for matching not and not not
+    * @property
+    */
+    , NOT_PATT = /^([!]{1,2})(.+)$/
+    /**
     * A regular expression pattern to match conditional expressions
     * @property
     */
@@ -224,6 +229,14 @@ function _Parser(
                 , match[1]
                 , match[2]
                 , match[3]
+            );
+        }
+        //maybe a not pattern
+        else if (!!(match = NOT_PATT.exec(expressionStr))) {
+            return parseNot(
+                variables
+                , match[1]
+                , match[2]
             );
         }
         //otherwise its a value expression
@@ -551,6 +564,20 @@ function _Parser(
         var treeNode = {
             "type": "regex"
             , "pattern": new RegExp(regExp, flags)
+        };
+
+        return treeNode;
+    }
+    /**
+    * @function
+    */
+    function parseNot(variables, not, expressionStr) {
+        var treeNode = {
+            "type": "not"
+            , "not": not
+            , "expression": Parser(
+                expressionStr
+            )
         };
 
         return treeNode;

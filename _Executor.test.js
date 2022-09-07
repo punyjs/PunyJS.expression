@@ -960,3 +960,69 @@ function expressionExecutorTest13(
         }
     );
 }
+/**
+* @test
+*   @title PunyJS.expression._Executor: not
+*/
+function expressionExecutorTest14(
+    controller
+    , mock_callback
+) {
+    var expressionExecutor, expressionTree, result, context
+    ;
+
+    arrange(
+        async function arrangeFn() {
+            expressionExecutor = await controller(
+                [
+                    ":PunyJS.expression._Executor"
+                    , [
+
+                    ]
+                ]
+            );
+            context = {
+                "app": {
+                    "path": {
+                        "variable": "screen.path.board-viewport.$show"
+                    }
+                }
+            };
+            expressionTree = {
+                "type": "not"
+                , "not": "!"
+                , "expression": {
+                    "type":"conditional"
+                    ,"sideA":{
+                        "type":"variable"
+                        ,"path":"app.path.variable"
+                    }
+                    ,"operator":"isin"
+                    ,"sideB":{
+                        "type":"regex"
+                        ,"pattern": /[.]path[.]([A-z0-9\\_$\-]+)([.].+)?$/im
+                    }
+                    ,"variables":["app.path.variable"]
+                }
+            };
+        }
+    );
+
+    act(
+        function actFn() {
+            result = expressionExecutor(
+                expressionTree
+                , context
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The result should be true")
+            .value(result)
+            .isFalse()
+            ;
+        }
+    );
+}

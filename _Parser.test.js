@@ -521,3 +521,55 @@ function expressionParserTest12(
         }
     );
 }
+/**
+* @test
+*   @title PunyJS.expression._Parser: not and not not
+*/
+function expressionParserTest13(
+    controller
+) {
+    var expressionParser, expressionTree, expression;
+
+    arrange(
+        async function arrangeFn() {
+            expressionParser = await controller(
+                [
+                    ":PunyJS.expression._Parser"
+                    , [
+
+                    ]
+                ]
+            );
+            expression = "!app.path.variable isin /[.]path[.]([A-z0-9\-_$]+)([.].+)?$/im";
+        }
+    );
+
+    act(
+        function actFn() {
+            expressionTree = expressionParser(
+                expression
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The expressionTree.expression variable should be")
+            .value(expressionTree, "expression.variables")
+            .stringify()
+            .equals(`["app.path.variable"]`)
+            ;
+
+            test("The expressionTree.not should be")
+            .value(expressionTree, "not")
+            .equals("!")
+            ;
+
+            test("The expressionTree.expression.type should be")
+            .value(expressionTree, "expression.type")
+            .toString()
+            .equals("conditional")
+            ;
+        }
+    );
+}
