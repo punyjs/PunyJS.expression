@@ -111,6 +111,13 @@ function _Executor(
                     , options
                 );
                 break;
+            case "concat":
+                return handleConcat(
+                    treeNode
+                    , context
+                    , options
+                );
+                break;
             default:
                 throw new Error(
                     `${errors.expression.invalid_expression_type} (${treeNode.type})`
@@ -547,5 +554,31 @@ function _Executor(
             return !!exprResults;
         }
         return !exprResults;
+    }
+    /**
+    * @function
+    */
+    function handleConcat(treeNode, context, options) {
+        var results = treeNode
+            .expressions
+            .map(
+                function mapExpressionResult(expression) {
+                    return handleType(
+                        expression
+                        , context
+                        , options
+                    );
+                }
+            )
+        , concatedValue = ""
+        ;
+        //loop through the results, adding each to the value
+        results.forEach(
+            function concatEachResult(result) {
+                concatedValue+= result;
+            }
+        );
+        
+        return concatedValue;
     }
 }

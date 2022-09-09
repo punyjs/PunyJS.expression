@@ -110,6 +110,11 @@ function _Parser(
     */
     , LITERAL_PATT = /^(?:('[^']*'|"[^"]*"|`[^`]*`|(?:0x)?[0-9.-]+)|true|false|null|undefined)$/
     /**
+    * A regular expression pattern to split the concat expression
+    * @property
+    */
+    , CONCAT_PATT = /[+]{3}/g
+    /**
     * A regular expression pattern to match function patterns in expressions.
     * @property
     */
@@ -208,8 +213,15 @@ function _Parser(
     */
     function parseExpression(variables, expressionStr) {
         var match;
+        //see if this has a concatination operation
+        if (CONCAT_PATT.exec(expressionStr)) {
+            return parseConcat(
+                variables
+                , expressionStr
+            );
+        }
         //see if this is an iterator
-        if (!!(match = ITER_PATT.exec(expressionStr))) {
+        else if (!!(match = ITER_PATT.exec(expressionStr))) {
             return parseIterator(
                 variables
                 , match
@@ -323,7 +335,6 @@ function _Parser(
     */
     function parseValueExpression(variables, expressionStr) {
         var match, expr, res;
-
         //remove any leading or trailing whitespace
         expressionStr = expressionStr.trim();
         //see if this is a literal
@@ -575,9 +586,28 @@ function _Parser(
         var treeNode = {
             "type": "not"
             , "not": not
-            , "expression": Parser(
-                expressionStr
+            , "expression": parseExpression(
+                variables
+                , expressionStr
             )
+        };
+
+        return treeNode;
+    }
+    /**
+    * @function
+    */
+    function parseConcat(variables, expressionStr) {
+        var treeNode = {
+            "type": "concat"
+            , "expressions": expressionStr
+                .split(CONCAT_PATT)
+                .map(
+                    parseExpression.bind(
+                        null
+                        , variables
+                    )
+                )
         };
 
         return treeNode;

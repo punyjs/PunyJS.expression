@@ -1026,3 +1026,67 @@ function expressionExecutorTest14(
         }
     );
 }
+/**
+* @test
+*   @title PunyJS.expression._Executor: concat
+*/
+function expressionExecutorTest15(
+    controller
+    , mock_callback
+) {
+    var expressionExecutor, expressionTree, result, context
+    ;
+
+    arrange(
+        async function arrangeFn() {
+            expressionExecutor = await controller(
+                [
+                    ":PunyJS.expression._Executor"
+                    , [
+
+                    ]
+                ]
+            );
+            context = {
+                "app": {
+                    "path": {
+                        "variable": "screen.path.board-viewport.$show"
+                    }
+                    , "title": "my title"
+                }
+            };
+            expressionTree = {
+                "type":"concat"
+                ,"expressions":[
+                    {"type":"variable","path":"app.path.variable"}
+                    ,{"type":"literal","value":"<->"}
+                    ,{"type":"variable","path":"app.title"}
+                ]
+                ,"variables":[
+                    "ref.index"
+                    ,"ref.parent.$every"
+                    ,"ref.parent"
+                    ,"state.title"
+                ]
+            };
+        }
+    );
+
+    act(
+        function actFn() {
+            result = expressionExecutor(
+                expressionTree
+                , context
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The result should be true")
+            .value(result)
+            .equals("screen.path.board-viewport.$show<->my title")
+            ;
+        }
+    );
+}

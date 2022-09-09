@@ -554,8 +554,8 @@ function expressionParserTest13(
 
     assert(
         function assertFn(test) {
-            test("The expressionTree.expression variable should be")
-            .value(expressionTree, "expression.variables")
+            test("The expressionTree.variables should be")
+            .value(expressionTree, "variables")
             .stringify()
             .equals(`["app.path.variable"]`)
             ;
@@ -569,6 +569,47 @@ function expressionParserTest13(
             .value(expressionTree, "expression.type")
             .toString()
             .equals("conditional")
+            ;
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.expression._Parser: concat
+*/
+function expressionParserTest14(
+    controller
+) {
+    var expressionParser, expressionTree, expression;
+
+    arrange(
+        async function arrangeFn() {
+            expressionParser = await controller(
+                [
+                    ":PunyJS.expression._Parser"
+                    , [
+
+                    ]
+                ]
+            );
+            expression = "ref.parent[ref.index] +++ '-'+++state.title";
+        }
+    );
+
+    act(
+        function actFn() {
+            expressionTree = expressionParser(
+                expression
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("expressionTree should be")
+            .value(expressionTree)
+            .stringify()
+            .equals(`{"type":"concat","expressions":[{"type":"variable","path":"ref.parent[ref.index]"},{"type":"literal","value":"-"},{"type":"variable","path":"state.title"}],"variables":["ref.index","ref.parent.$every","ref.parent","state.title"]}`)
             ;
         }
     );
