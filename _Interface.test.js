@@ -184,7 +184,6 @@ function expressionInterfaceTest3(
         function actFn() {
             expInterface = expressionInterface(
                 expression
-                , context
             );
             result = expInterface.execute(
                 context
