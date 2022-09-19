@@ -80,20 +80,40 @@ function _Parser(
     */
     , TYPE_PATT = /^\[([a-z]+)\]$/
     /**
+    * A regular expression pattern for matching the regexp pattern
+    * @property
+    */
+    , REGEXP_PATT = /^(?<!\/)\/(.+)(?<!\/)\/([gimyusd]*)$/
+    /**
+    * A regular expression pattern for matching a regexp match pattern
+    * @property
+    */
+    , MATCH_PATT = /^([\-A-Za-z0-9$.,()\[\]_\ '"`]+)(?:(?<!\/)\/(.+)(?<!\/)\/([gimyusd]*))$/
+    /**
+    * A regular expression pattern for matching not and not not
+    * @property
+    */
+    , NOT_PATT = /^([!]{1,2})(.+)$/
+    /**
     * A regular expression pattern to match conditional expressions
     * @property
     */
-    , COND_PATT = /^([\-A-Za-z0-9$.,()\[\]_\ '"`]+) (is|!is|isin|!isin|==|>|<|!=|>=|<=|!==|===) ([\-A-Za-z0-9$.,()\[\]_\ '"`]+)$/i
+    , COND_PATT =  /^([\-A-Za-z0-9$.,()\[\]_\ '"`]+) (is|!is|isin|!isin|==|>|<|!=|>=|<=|!==|===) ([A-z0-9$.,()\[\]_\\ \/\-'"`]+|(?<!\/)\/.+(?<!\/)\/[gimyusd]+)$/i
     /**
     * A regular expression pattern to match iterator expressions
     * @property
     */
-    , ITER_PATT = /^([A-Za-z0-9$_]+)(?:, ?([A-Za-z0-9$_]+))?(?:, ?([A-Za-z0-9$_]+))? (in|for) ([A-Za-z0-9.()'"`\[\],$_\{\} :]+)(?: sort ([A-z0-9$._\[\]]+)(?: (desc|asc))?)?(?: filter (.+))?$/i
+    , ITER_PATT = /^([A-Za-z0-9$_]+)(?:, ?([A-Za-z0-9$_]+))?(?:, ?([A-Za-z0-9$_]+))? (in|for) ([A-Za-z0-9.()'"`\[\],$_\{\} :]+|[\-A-Za-z0-9$.,()\[\]_\ '"`]+(?<!\/)\/.+(?<!\/)\/[gimyusd]+)(?: sort ([A-z0-9$._\[\]]+)(?: (desc|asc))?)?(?: filter (.+))?$/i
     /**
     * A regular expression pattern to match literal expressions
     * @property
     */
     , LITERAL_PATT = /^(?:('[^']*'|"[^"]*"|`[^`]*`|(?:0x)?[0-9.-]+)|true|false|null|undefined)$/
+    /**
+    * A regular expression pattern to split the concat expression
+    * @property
+    */
+    , CONCAT_PATT = /[+]{3}/g
     /**
     * A regular expression pattern to match function patterns in expressions.
     * @property
@@ -193,8 +213,15 @@ function _Parser(
     */
     function parseExpression(variables, expressionStr) {
         var match;
+        //see if this has a concatination operation
+        if (CONCAT_PATT.exec(expressionStr)) {
+            return parseConcat(
+                variables
+                , expressionStr
+            );
+        }
         //see if this is an iterator
-        if (!!(match = ITER_PATT.exec(expressionStr))) {
+        else if (!!(match = ITER_PATT.exec(expressionStr))) {
             return parseIterator(
                 variables
                 , match
@@ -205,6 +232,23 @@ function _Parser(
             return parseConditional(
                 variables
                 , match
+            );
+        }
+        //perhaps a regexp match
+        else if (!!(match = MATCH_PATT.exec(expressionStr))) {
+            return parseRegExpMatch(
+                variables
+                , match[1]
+                , match[2]
+                , match[3]
+            );
+        }
+        //maybe a not pattern
+        else if (!!(match = NOT_PATT.exec(expressionStr))) {
+            return parseNot(
+                variables
+                , match[1]
+                , match[2]
             );
         }
         //otherwise its a value expression
@@ -291,7 +335,6 @@ function _Parser(
     */
     function parseValueExpression(variables, expressionStr) {
         var match, expr, res;
-
         //remove any leading or trailing whitespace
         expressionStr = expressionStr.trim();
         //see if this is a literal
@@ -333,8 +376,16 @@ function _Parser(
                     , match[0]
                 );
             }
+            //or regular expressions
+            else if (!!(match = REGEXP_PATT.exec(expressionStr))) {
+                return parseRegExp(
+                    variables
+                    , match[1]
+                    , match[2]
+                );
+            }
             //or a varaible path
-            else if(!!VAR_PATT.exec(expressionStr)) {
+            else if (!!VAR_PATT.exec(expressionStr)) {
                 addVariables(
                     variables
                     , expressionStr
@@ -495,6 +546,69 @@ function _Parser(
                 treeNode.properties[key] = expr;
             }
         );
+
+        return treeNode;
+    }
+    /**
+    * @function
+    */
+    function parseRegExpMatch(variables, lookup, pattern, flags) {
+        var treeNode = {
+            "type": "match"
+            , "value": parseValueExpression(
+                variables
+                , lookup
+            )
+            , "regexp": parseRegExp(
+                variables
+                , pattern
+                , flags
+            )
+        };
+
+        return treeNode;
+    }
+    /**
+    * @function
+    */
+    function parseRegExp(variables, regExp, flags) {
+        var treeNode = {
+            "type": "regex"
+            , "pattern": new RegExp(regExp, flags)
+        };
+
+        return treeNode;
+    }
+    /**
+    * @function
+    */
+    function parseNot(variables, not, expressionStr) {
+        var treeNode = {
+            "type": "not"
+            , "not": not
+            , "expression": parseExpression(
+                variables
+                , expressionStr
+            )
+        };
+
+        return treeNode;
+    }
+    /**
+    * @function
+    */
+    function parseConcat(variables, expressionStr) {
+        var treeNode = {
+            "type": "concat"
+            , "expressions": expressionStr
+                .split(CONCAT_PATT)
+                .map(
+                    parseExpression.bind(
+                        null
+                        , variables
+                    )
+                )
+        };
 
         return treeNode;
     }

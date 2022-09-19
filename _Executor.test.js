@@ -1,6 +1,6 @@
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Executor: chain, execution, literal and array
+*   @title PunyJS.expression._Executor: chain, execution, literal and array
 */
 function expressionExecutorTest1(
     controller
@@ -12,7 +12,7 @@ function expressionExecutorTest1(
         async function arrangeFn() {
             expressionExecutor = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Executor"
+                    ":PunyJS.expression._Executor"
                     , [
 
                     ]
@@ -89,7 +89,7 @@ function expressionExecutorTest1(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Executor: chain, bind, object
+*   @title PunyJS.expression._Executor: chain, bind, object
 */
 function expressionExecutorTest2(
     controller
@@ -101,7 +101,7 @@ function expressionExecutorTest2(
         async function arrangeFn() {
             expressionExecutor = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Executor"
+                    ":PunyJS.expression._Executor"
                     , [
 
                     ]
@@ -179,7 +179,7 @@ function expressionExecutorTest2(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Executor: conditional coercive equals, execution
+*   @title PunyJS.expression._Executor: conditional coercive equals, execution
 */
 function expressionExecutorTest3(
     controller
@@ -191,7 +191,7 @@ function expressionExecutorTest3(
         async function arrangeFn() {
             expressionExecutor = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Executor"
+                    ":PunyJS.expression._Executor"
                     , [
 
                     ]
@@ -251,7 +251,7 @@ function expressionExecutorTest3(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Executor: conditional isin, literal
+*   @title PunyJS.expression._Executor: conditional isin, literal
 */
 function expressionExecutorTest4(
     controller
@@ -263,7 +263,7 @@ function expressionExecutorTest4(
         async function arrangeFn() {
             expressionExecutor = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Executor"
+                    ":PunyJS.expression._Executor"
                     , [
 
                     ]
@@ -312,7 +312,7 @@ function expressionExecutorTest4(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Executor: conditional !isin, literal
+*   @title PunyJS.expression._Executor: conditional !isin, literal
 */
 function expressionExecutorTest5(
     controller
@@ -324,7 +324,7 @@ function expressionExecutorTest5(
         async function arrangeFn() {
             expressionExecutor = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Executor"
+                    ":PunyJS.expression._Executor"
                     , [
 
                     ]
@@ -373,7 +373,7 @@ function expressionExecutorTest5(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Executor: conditional is
+*   @title PunyJS.expression._Executor: conditional is
 */
 function expressionExecutorTest6(
     controller
@@ -385,7 +385,7 @@ function expressionExecutorTest6(
         async function arrangeFn() {
             expressionExecutor = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Executor"
+                    ":PunyJS.expression._Executor"
                     , [
 
                     ]
@@ -434,7 +434,7 @@ function expressionExecutorTest6(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Executor: conditional !is
+*   @title PunyJS.expression._Executor: conditional !is
 */
 function expressionExecutorTest7(
     controller
@@ -446,7 +446,7 @@ function expressionExecutorTest7(
         async function arrangeFn() {
             expressionExecutor = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Executor"
+                    ":PunyJS.expression._Executor"
                     , [
 
                     ]
@@ -495,7 +495,7 @@ function expressionExecutorTest7(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Executor: basic iterator, in
+*   @title PunyJS.expression._Executor: basic iterator, in
 */
 function expressionExecutorTest8(
     controller
@@ -507,7 +507,7 @@ function expressionExecutorTest8(
         async function arrangeFn() {
             expressionExecutor = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Executor"
+                    ":PunyJS.expression._Executor"
                     , [
 
                     ]
@@ -580,7 +580,7 @@ function expressionExecutorTest8(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Executor: iterator, in, sort, filter
+*   @title PunyJS.expression._Executor: iterator, in, sort, filter
 */
 function expressionExecutorTest9(
     controller
@@ -592,7 +592,7 @@ function expressionExecutorTest9(
         async function arrangeFn() {
             expressionExecutor = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Executor"
+                    ":PunyJS.expression._Executor"
                     , [
 
                     ]
@@ -680,7 +680,7 @@ function expressionExecutorTest9(
 }
 /**
 * @test
-*   @title PunyJS.ui.gui.expression._Executor: iterator, for, step
+*   @title PunyJS.expression._Executor: iterator, for, step
 */
 function expressionExecutorTest10(
     controller
@@ -692,7 +692,7 @@ function expressionExecutorTest10(
         async function arrangeFn() {
             expressionExecutor = await controller(
                 [
-                    ":PunyJS.ui.gui.expression._Executor"
+                    ":PunyJS.expression._Executor"
                     , [
 
                     ]
@@ -759,6 +759,333 @@ function expressionExecutorTest10(
             .value(secVal)
             .stringify()
             .equals('{"$key":"2","$i":2,"val":"2"}')
+            ;
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.expression._Executor: conditional using regexp match
+*/
+function expressionExecutorTest11(
+    controller
+    , mock_callback
+) {
+    var expressionExecutor, expressionTree, result, context
+    ;
+
+    arrange(
+        async function arrangeFn() {
+            expressionExecutor = await controller(
+                [
+                    ":PunyJS.expression._Executor"
+                    , [
+
+                    ]
+                ]
+            );
+            context = {
+                "app": {
+                    "path": {
+                        "variable": "screen.path.board-viewport.$show"
+                    }
+                }
+            };
+            expressionTree = {
+                "type":"conditional"
+                ,"sideA":{
+                    "type":"variable"
+                    ,"path":"app.path.variable"
+                }
+                ,"operator":"isin"
+                ,"sideB":{
+                    "type":"regex"
+                    ,"pattern": /[.]path[.]([A-z0-9\\_$\-]+)([.].+)?$/im
+                }
+                ,"variables":["app.path.variable"]
+            };
+        }
+    );
+
+    act(
+        function actFn() {
+            result = expressionExecutor(
+                expressionTree
+                , context
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The result should be true")
+            .value(result)
+            .isTrue()
+            ;
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.expression._Executor: regex match
+*/
+function expressionExecutorTest12(
+    controller
+    , mock_callback
+) {
+    var expressionExecutor, expressionTree, result, context
+    ;
+
+    arrange(
+        async function arrangeFn() {
+            expressionExecutor = await controller(
+                [
+                    ":PunyJS.expression._Executor"
+                    , [
+
+                    ]
+                ]
+            );
+            context = {
+                "app": {
+                    "path": {
+                        "variable": "screen.path.board-viewport.$show.path"
+                    }
+                }
+            };
+            expressionTree = {
+                "type":"match"
+                , "value": {
+                    "type": "variable"
+                    , "path": "app.path.variable"
+                }
+                ,"regexp":{
+                    "type":"regex"
+                    ,"pattern": /([.]|^)(path)([.]|$)/g
+                }
+                ,"variables":["app.path.variable"]
+            };
+        }
+    );
+
+    act(
+        function actFn() {
+            result = expressionExecutor(
+                expressionTree
+                , context
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The result should be a regex match")
+            .value(result)
+            .stringify()
+            .equals(`[[".path.",".","path","."],[".path",".","path",""]]`)
+            ;
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.expression._Executor: iterator using regex match
+*/
+function expressionExecutorTest13(
+    controller
+    , mock_callback
+) {
+    var expressionExecutor, expressionTree, result1, result2, context, iterator
+    ;
+
+    arrange(
+        async function arrangeFn() {
+            expressionExecutor = await controller(
+                [
+                    ":PunyJS.expression._Executor"
+                    , [
+
+                    ]
+                ]
+            );
+            context = {
+                "app": {
+                    "path": {
+                        "variable": "screen.path.board-viewport.$show.path"
+                    }
+                }
+            };
+            expressionTree = {
+                "type": "iterator"
+                , "lookup": {
+                    "key": "$k"
+                    , "index": "$i"
+                    , "value": "$match"
+                }
+                , "collection": {
+                    "type":"match"
+                    , "value": {
+                        "type": "variable"
+                        , "path": "app.path.variable"
+                    }
+                    ,"regexp":{
+                        "type":"regex"
+                        ,"pattern": /(?<prefix>[.]|^)(?<path>path)(?<suffix>[.]|$)/g
+                    }
+                    ,"variables":["app.path.variable"]
+                }
+                , "operator": "in"
+            };
+        }
+    );
+
+    act(
+        function actFn() {
+            iterator = expressionExecutor(
+                expressionTree
+                , context
+            );
+            result1 = iterator.next();
+            result2 = iterator.next();
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The result1.$match.groups should be a regex match")
+            .value(result1, "$match.groups")
+            .stringify()
+            .equals(`{"prefix":".","path":"path","suffix":"."}`)
+            ;
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.expression._Executor: not
+*/
+function expressionExecutorTest14(
+    controller
+    , mock_callback
+) {
+    var expressionExecutor, expressionTree, result, context
+    ;
+
+    arrange(
+        async function arrangeFn() {
+            expressionExecutor = await controller(
+                [
+                    ":PunyJS.expression._Executor"
+                    , [
+
+                    ]
+                ]
+            );
+            context = {
+                "app": {
+                    "path": {
+                        "variable": "screen.path.board-viewport.$show"
+                    }
+                }
+            };
+            expressionTree = {
+                "type": "not"
+                , "not": "!"
+                , "expression": {
+                    "type":"conditional"
+                    ,"sideA":{
+                        "type":"variable"
+                        ,"path":"app.path.variable"
+                    }
+                    ,"operator":"isin"
+                    ,"sideB":{
+                        "type":"regex"
+                        ,"pattern": /[.]path[.]([A-z0-9\\_$\-]+)([.].+)?$/im
+                    }
+                    ,"variables":["app.path.variable"]
+                }
+            };
+        }
+    );
+
+    act(
+        function actFn() {
+            result = expressionExecutor(
+                expressionTree
+                , context
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The result should be true")
+            .value(result)
+            .isFalse()
+            ;
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.expression._Executor: concat
+*/
+function expressionExecutorTest15(
+    controller
+    , mock_callback
+) {
+    var expressionExecutor, expressionTree, result, context
+    ;
+
+    arrange(
+        async function arrangeFn() {
+            expressionExecutor = await controller(
+                [
+                    ":PunyJS.expression._Executor"
+                    , [
+
+                    ]
+                ]
+            );
+            context = {
+                "app": {
+                    "path": {
+                        "variable": "screen.path.board-viewport.$show"
+                    }
+                    , "title": "my title"
+                }
+            };
+            expressionTree = {
+                "type":"concat"
+                ,"expressions":[
+                    {"type":"variable","path":"app.path.variable"}
+                    ,{"type":"literal","value":"<->"}
+                    ,{"type":"variable","path":"app.title"}
+                ]
+                ,"variables":[
+                    "ref.index"
+                    ,"ref.parent.$every"
+                    ,"ref.parent"
+                    ,"state.title"
+                ]
+            };
+        }
+    );
+
+    act(
+        function actFn() {
+            result = expressionExecutor(
+                expressionTree
+                , context
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The result should be true")
+            .value(result)
+            .equals("screen.path.board-viewport.$show<->my title")
             ;
         }
     );
