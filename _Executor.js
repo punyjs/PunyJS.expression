@@ -570,15 +570,31 @@ function _Executor(
                     );
                 }
             )
-        , concatedValue = ""
+        , concatedValue
         ;
         //loop through the results, adding each to the value
         results.forEach(
             function concatEachResult(result) {
-                concatedValue+= result;
+                if (concatedValue === undefined) {
+                    concatedValue = result;
+                }
+                else if (is_array(concatedValue)) {
+                    concatedValue = concatedValue.concat(
+                        result
+                    );
+                }
+                else if (is_array(result)) {
+                    concatedValue = [concatedValue]
+                    .concat(
+                        result
+                    );
+                }
+                else {
+                    concatedValue+= result;
+                }
             }
         );
-        
+
         return concatedValue;
     }
 }
