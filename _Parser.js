@@ -68,12 +68,12 @@ function _Parser(
     * A regular expression pattern to match object patterns in expressions
     * @property
     */
-    , OBJ_PATT = /^\{.+\}$/
+    , OBJ_PATT = /^\{.*\}$/
     /**
     * A regular expression pattern to match array patterns in expressions
     * @property
     */
-    , ARRAY_PATT = /^\[([A-Za-z0-9$.()_"`'\[\],-. ]+)\]$/
+    , ARRAY_PATT = /^\[(.*)\]$/
     /**
     * A regular expression pattern to match type patterns in expressions
     * @property
@@ -103,7 +103,7 @@ function _Parser(
     * A regular expression pattern to match iterator expressions
     * @property
     */
-    , ITER_PATT = /^([A-Za-z0-9$_]+)(?:, ?([A-Za-z0-9$_]+))?(?:, ?([A-Za-z0-9$_]+))? (in|for) ([A-Za-z0-9.()'"`\[\],$_\{\} :]+|[\-A-Za-z0-9$.,()\[\]_\ '"`]+(?<!\/)\/.+(?<!\/)\/[gimyusd]+)(?: sort ([A-z0-9$._\[\]]+)(?: (desc|asc))?)?(?: filter (.+))?$/i
+    , ITER_PATT = /^([A-Za-z0-9$_]+)(?:, ?([A-Za-z0-9$_]+))?(?:, ?([A-Za-z0-9$_]+))? (in|for) (.+)(?: sort ([A-z0-9$._\[\]]+)(?: (desc|asc))?)?(?: filter (.+))?$/i
     /**
     * A regular expression pattern to match literal expressions
     * @property
