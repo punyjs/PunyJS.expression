@@ -7,6 +7,7 @@
         , "numeric": [":PunyJS.core.is.Numeric"]
         , "string": [":PunyJS.core.is.String"]
         , "regexp": [":PunyJS.core.is.RegExp"]
+        , "nill": [":PunyJS.core.is.Nill"]
     }]
     , "utils": [{
         "getType": [":PunyJS.core.utils.GetType"]

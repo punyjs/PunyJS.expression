@@ -36,7 +36,6 @@ function expressionInterfaceTest1(
         function actFn() {
             expInterface = expressionInterface(
                 expression
-                , context
             );
             iterator = expInterface.execute(
                 context
