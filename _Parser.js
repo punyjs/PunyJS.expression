@@ -57,6 +57,7 @@ function _Parser(
     utils_eval
     , is_numeric
     , is_string
+    , is_nill
     , errors
 ) {
     /**
@@ -108,7 +109,17 @@ function _Parser(
     * A regular expression pattern to match literal expressions
     * @property
     */
-    , LITERAL_PATT = /^(?:('[^']*'|"[^"]*"|`[^`]*`|(?:0x)?[0-9.-]+)|true|false|null|undefined)$/
+    , LITERAL_PATT = /^(?:'[^']*'|"[^"]*"|`[^`]*`|[-]?(?:0b[0-1]+|0x[0-9a-f]+|0o[0-8]+|[0-9]+(?:[.][0-9]+)?(?:e[-]?[0-9]+)?|Infinity)|true|false|null|undefined)$/
+    /**
+    * A regular expression pattern to match string literal expressions
+    * @property
+    */
+    , STRING_PATT = /(?<![\\])[']((?:[^']|[\\'])*?)(?<![\\])[']|(?<![\\])[`]((?:[^`]|[\`])*?)(?<![\\])[`]|(?<![\\])["]((?:[^"]|[\\"])*?)(?<![\\])["]/g
+    /**
+    * A regular expression pattern to match string literal placeholders
+    * @property
+    */
+    , STRING_PLACEHOLDER_PATT = /<<([0-9]+)~~>>/
     /**
     * A regular expression pattern to split the concat expression
     * @property
@@ -138,7 +149,7 @@ function _Parser(
     * A regular expression pattern to replace array or oject patterns
     * @property
     */
-    , ARRAY_OBJ_PATT = /((?:\[([A-Za-z0-9$.()_'\[\], "`\-\.]+)\])|(?:\{.+\}))/g
+    , ARRAY_OBJ_PATT = /((?:\[(.*)\])|(?:\{.*\}))/g
     /**
     * A regular expression pattern to replace indexer patterns
     * @property
@@ -153,19 +164,42 @@ function _Parser(
     */
     function Parser(expressionStr) {
         var variables = []
-        , exprTree;
+        //a container to hold the string literals
+        , strings = []
+        //remove string literals so we don't match anything in their contents
+        , strippedExpressionStr = expressionStr.replace(
+            STRING_PATT
+            , function removeStrings(match, value1, value2, value3, value4) {
+                var value = !is_nill(value1)
+                    ? value1
+                    : !is_nill(value2)
+                        ? value2
+                        : !is_nill(value3)
+                            ? value3
+                            : null
+                , index = strings.length;
+                strings.push(
+                    value
+                );
+                return `"<<${index}~~>>"`;
+            }
+        )
+        , exprTree
+        ;
         //first step is to split any "||" or "&&"
-        if (expressionStr.match(HAS_AND_OR_PATT)) {
+        if (strippedExpressionStr.match(HAS_AND_OR_PATT)) {
             exprTree = splitLogical(
                 variables
-                , expressionStr
+                , strings
+                , strippedExpressionStr
             );
         }
         //otherwise just parse the expression
         else {
             exprTree = parseExpression(
                 variables
-                , expressionStr
+                , strings
+                , strippedExpressionStr
             );
         }
         //add the variables to the expression tree
@@ -177,7 +211,7 @@ function _Parser(
     /**
     * @function
     */
-    function splitLogical(variables, expressionStr) {
+    function splitLogical(variables, strings, expressionStr) {
         var tree = {
             "type": "chain"
             , "sections": []
@@ -189,6 +223,7 @@ function _Parser(
                 tree.sections.push(
                     parseExpression(
                         variables
+                        , strings
                         , expr.trim()
                     )
                 );
@@ -211,12 +246,13 @@ function _Parser(
     /**
     * @function
     */
-    function parseExpression(variables, expressionStr) {
+    function parseExpression(variables, strings, expressionStr) {
         var match;
         //see if this has a concatination operation
         if (CONCAT_PATT.exec(expressionStr)) {
             return parseConcat(
                 variables
+                , strings
                 , expressionStr
             );
         }
@@ -224,6 +260,7 @@ function _Parser(
         else if (!!(match = ITER_PATT.exec(expressionStr))) {
             return parseIterator(
                 variables
+                , strings
                 , match
             );
         }
@@ -231,6 +268,7 @@ function _Parser(
         else if (!!(match = COND_PATT.exec(expressionStr))) {
             return parseConditional(
                 variables
+                , strings
                 , match
             );
         }
@@ -238,6 +276,7 @@ function _Parser(
         else if (!!(match = MATCH_PATT.exec(expressionStr))) {
             return parseRegExpMatch(
                 variables
+                , strings
                 , match[1]
                 , match[2]
                 , match[3]
@@ -247,6 +286,7 @@ function _Parser(
         else if (!!(match = NOT_PATT.exec(expressionStr))) {
             return parseNot(
                 variables
+                , strings
                 , match[1]
                 , match[2]
             );
@@ -255,6 +295,7 @@ function _Parser(
         else {
             return parseValueExpression(
                 variables
+                , strings
                 , expressionStr
             );
         }
@@ -262,12 +303,13 @@ function _Parser(
     /**
     * @function
     */
-    function parseConditional(variables, match) {
+    function parseConditional(variables, strings, match) {
         var typeMatch
         , treeNode = {
             "type": "conditional"
             , "sideA": parseExpression(
                 variables
+                , strings
                 , match[1]
             )
             , "operator": match[2]
@@ -282,6 +324,7 @@ function _Parser(
         else {
             treeNode.sideB = parseExpression(
                 variables
+                , strings
                 , match[3]
             );
         }
@@ -291,7 +334,7 @@ function _Parser(
     /**
     * @function
     */
-    function parseIterator(variables, match) {
+    function parseIterator(variables, strings, match) {
         var treeNode = {
             "type": "iterator"
             , "lookup": {
@@ -300,6 +343,7 @@ function _Parser(
             , "operator": match[4]
             , "collection": parseExpression(
                 variables
+                , strings
                 , match[5]
             )
         };
@@ -318,6 +362,7 @@ function _Parser(
         if (!!match[8]) {
             treeNode.filter = parseExpression(
                 match[8]
+                , strings
                 , context
             );
         }
@@ -333,12 +378,15 @@ function _Parser(
     /**
     * @function
     */
-    function parseValueExpression(variables, expressionStr) {
+    function parseValueExpression(variables, strings, expressionStr) {
         var match, expr, res;
         //remove any leading or trailing whitespace
         expressionStr = expressionStr.trim();
         //see if this is a literal
         if (LITERAL_PATT.test(expressionStr)) {
+            if ((match = expressionStr.match(STRING_PLACEHOLDER_PATT))) {
+                expressionStr = `"${strings[match[1]]}"`;
+            }
             return {
                 "type": "literal"
                 , "value": expressionStr === "undefined"
@@ -352,6 +400,7 @@ function _Parser(
             if (!!(match = FUNC_PATT.exec(expressionStr))) {
                 return parsefunc(
                     variables
+                    , strings
                     , match
                 );
             }
@@ -359,6 +408,7 @@ function _Parser(
             else if (!!(match = ARRAY_PATT.exec(expressionStr))) {
                 return parseArray(
                     variables
+                    , strings
                     , match[1]
                 );
             }
@@ -366,6 +416,7 @@ function _Parser(
             else if(!!(match = BIND_FUNC_PATT.exec(expressionStr))) {
                 return parseBindFunc(
                     variables
+                    , strings
                     , match
                 );
             }
@@ -373,6 +424,7 @@ function _Parser(
             else if (!!(match = OBJ_PATT.exec(expressionStr))) {
                 return parseObject(
                     variables
+                    , strings
                     , match[0]
                 );
             }
@@ -405,7 +457,7 @@ function _Parser(
     /**
     * @function
     */
-    function parsefunc(variables, match) {
+    function parsefunc(variables, strings, match) {
         var treeNode = {
             "type": "execution"
             , "path": match[1]
@@ -424,6 +476,7 @@ function _Parser(
             function parseEachArg(arg) {
                 var expr = parseExpression(
                     variables
+                    , strings
                     , arg
                 );
                 treeNode.arguments.push(
@@ -437,7 +490,7 @@ function _Parser(
     /**
     * @function
     */
-    function parseBindFunc(variables, match) {
+    function parseBindFunc(variables, strings, match) {
         var treeNode = {
             "type": "bind"
             , "path": match[2]
@@ -456,6 +509,7 @@ function _Parser(
             function parseEachArg(arg) {
                 var expr = parseExpression(
                     variables
+                    , strings
                     , arg
                 );
                 treeNode.arguments.push(
@@ -478,7 +532,7 @@ function _Parser(
         , exprNoObjNoArray = expression.replace(
             ARRAY_OBJ_PATT
             , function replaceArray(match, obj) {
-                var name = `<part${++cnt}>`;
+                var name = `<<~~~${++cnt}>>`;
                 parts[name] = obj;
                 return name;
             }
@@ -500,7 +554,7 @@ function _Parser(
     /**
     * @function
     */
-    function parseArray(variables, value) {
+    function parseArray(variables, strings, value) {
         var arrayMemebers = value.split(",")
         , treeNode = {
             "type": "array"
@@ -512,6 +566,7 @@ function _Parser(
             function forEachMember(memberStr) {
                 var expr = parseExpression(
                     variables
+                    , strings
                     , memberStr
                 );
                 treeNode.members.push(
@@ -526,24 +581,33 @@ function _Parser(
     /**
     * @function
     */
-    function parseObject(variables, json) {
-        var value = JSON.parse(json)
+    function parseObject(variables, strings, json) {
+        var valueObj = JSON.parse(json)
         , treeNode = {
             "type": "object"
             , "properties": {}
         };
         //process the object properties, they could be expressions also
-        Object.keys(value)
+        Object.keys(valueObj)
         .forEach(
             function forEachKey(key) {
-                var propValue = value[key]
-                , expr = propValue
+                var value = valueObj[key]
+                , keyIndex = key.match(STRING_PLACEHOLDER_PATT)[1]
+                , propMatch = value.match(STRING_PLACEHOLDER_PATT)
+                , propIndex = !!propMatch
+                    && propMatch[1]
+                , propName = strings[keyIndex]
+                , propValue = !!propMatch
+                    ? strings[propIndex]
+                    : value
+                , expr
                 ;
                 expr = parseExpression(
                     variables
-                    , expr
+                    , strings
+                    , propValue
                 );
-                treeNode.properties[key] = expr;
+                treeNode.properties[propName] = expr;
             }
         );
 
@@ -552,11 +616,12 @@ function _Parser(
     /**
     * @function
     */
-    function parseRegExpMatch(variables, lookup, pattern, flags) {
+    function parseRegExpMatch(variables, strings, lookup, pattern, flags) {
         var treeNode = {
             "type": "match"
             , "value": parseValueExpression(
                 variables
+                , strings
                 , lookup
             )
             , "regexp": parseRegExp(
@@ -582,12 +647,13 @@ function _Parser(
     /**
     * @function
     */
-    function parseNot(variables, not, expressionStr) {
+    function parseNot(variables, strings, not, expressionStr) {
         var treeNode = {
             "type": "not"
             , "not": not
             , "expression": parseExpression(
                 variables
+                , strings
                 , expressionStr
             )
         };
@@ -597,7 +663,7 @@ function _Parser(
     /**
     * @function
     */
-    function parseConcat(variables, expressionStr) {
+    function parseConcat(variables, strings, expressionStr) {
         var treeNode = {
             "type": "concat"
             , "expressions": expressionStr
@@ -606,6 +672,7 @@ function _Parser(
                     parseExpression.bind(
                         null
                         , variables
+                        , strings
                     )
                 )
         };

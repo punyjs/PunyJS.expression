@@ -614,3 +614,44 @@ function expressionParserTest14(
         }
     );
 }
+/**
+* @test
+*   @title PunyJS.expression._Parser: strings with
+*/
+function expressionParserTest15(
+    controller
+) {
+    var expressionParser, expressionTree, expression;
+
+    arrange(
+        async function arrangeFn() {
+            expressionParser = await controller(
+                [
+                    ":PunyJS.expression._Parser"
+                    , [
+
+                    ]
+                ]
+            );
+            expression = "'func(-1 && b111)' +++ `$show.variable[1].name` +++ ''";
+        }
+    );
+
+    act(
+        function actFn() {
+            expressionTree = expressionParser(
+                expression
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("expressionTree should be")
+            .value(expressionTree)
+            .stringify()
+            .equals(`{"type":"concat","expressions":[{"type":"literal","value":"func(-1 && b111)"},{"type":"literal","value":"$show.variable[1].name"},{"type":"literal","value":""}],"variables":[]}`)
+            ;
+        }
+    );
+}
