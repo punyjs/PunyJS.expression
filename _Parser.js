@@ -64,7 +64,7 @@ function _Parser(
     * A regular expression pattern to match literal expressions
     * @property
     */
-    var BIND_FUNC_PATT = /^\(([^)]+)\) ?=> ?([A-Za-z0-9$.,"`'\[\]_]+)$/
+    const BIND_FUNC_PATT = /^\(([^)]+)\) ?=> ?([A-Za-z0-9$.,"`'\[\]_]+)$/
     /**
     * A regular expression pattern to match object patterns in expressions
     * @property
@@ -119,7 +119,7 @@ function _Parser(
     * A regular expression pattern to match string literal placeholders
     * @property
     */
-    , STRING_PLACEHOLDER_PATT = /<<([0-9]+)~~>>/
+    , STRING_PLACEHOLDER_PATT = /(?<![<\\])[<]([0-9]+)(?<![<\\])[>]/
     /**
     * A regular expression pattern to split the concat expression
     * @property
@@ -155,6 +155,26 @@ function _Parser(
     * @property
     */
     , INDXR_PATT = /\[(.+)\]/g
+    /**
+    * A regular expression pattern to find operators
+    * @property
+    */
+    , OPERATOR_PATT = /(?<![\\])(?:[+\-*/%&|~^]|[*]{2}|[>]{2}|[<]{2}|[>]{3})(?![ ]*[=])/
+    /**
+    * A list of operators in reverse order of precendence
+    * @field
+    */
+    , operatorPrecedence = {
+        ">>>": /(?<![\\])[>]{3}/
+        , ">>": /(?<![\\])[>]{2}(?![>])/
+        , "<<": /(?<![\\])[<]{2}/
+        , "-": /(?<![\\])[-]/
+        , "+": /(?<![\\])[+]/
+        , "%": /(?<![\\])[%]/
+        , "/": /(?<![\\])[\/]/
+        , "*": /(?<![\\*])[*](?![*])/
+        , "**":  /(?<![\\])[*]{2}/
+    }
     ;
 
     return Parser;
@@ -181,7 +201,7 @@ function _Parser(
                 strings.push(
                     value
                 );
-                return `"<<${index}~~>>"`;
+                return `"<${index}>"`;
             }
         )
         , exprTree
@@ -249,7 +269,7 @@ function _Parser(
     function parseExpression(variables, strings, expressionStr) {
         var match;
         //see if this has a concatination operation
-        if (CONCAT_PATT.exec(expressionStr)) {
+        if (expressionStr.match(CONCAT_PATT)) {
             return parseConcat(
                 variables
                 , strings
@@ -257,7 +277,7 @@ function _Parser(
             );
         }
         //see if this is an iterator
-        else if (!!(match = ITER_PATT.exec(expressionStr))) {
+        else if (!!(match = expressionStr.match(ITER_PATT))) {
             return parseIterator(
                 variables
                 , strings
@@ -265,7 +285,7 @@ function _Parser(
             );
         }
         //maybe a conditional statement
-        else if (!!(match = COND_PATT.exec(expressionStr))) {
+        else if (!!(match = expressionStr.match(COND_PATT))) {
             return parseConditional(
                 variables
                 , strings
@@ -273,7 +293,7 @@ function _Parser(
             );
         }
         //perhaps a regexp match
-        else if (!!(match = MATCH_PATT.exec(expressionStr))) {
+        else if (!!(match = expressionStr.match(MATCH_PATT))) {
             return parseRegExpMatch(
                 variables
                 , strings
@@ -283,7 +303,7 @@ function _Parser(
             );
         }
         //maybe a not pattern
-        else if (!!(match = NOT_PATT.exec(expressionStr))) {
+        else if (!!(match = expressionStr.match(NOT_PATT))) {
             return parseNot(
                 variables
                 , strings
@@ -397,7 +417,7 @@ function _Parser(
         //not a literal, should be a data value
         else {
             //see if this is a function
-            if (!!(match = FUNC_PATT.exec(expressionStr))) {
+            if (!!(match = expressionStr.match(FUNC_PATT))) {
                 return parsefunc(
                     variables
                     , strings
@@ -405,7 +425,7 @@ function _Parser(
                 );
             }
             //or an array literal
-            else if (!!(match = ARRAY_PATT.exec(expressionStr))) {
+            else if (!!(match = expressionStr.match(ARRAY_PATT))) {
                 return parseArray(
                     variables
                     , strings
@@ -413,7 +433,7 @@ function _Parser(
                 );
             }
             //or a bind operation
-            else if(!!(match = BIND_FUNC_PATT.exec(expressionStr))) {
+            else if(!!(match = expressionStr.match(BIND_FUNC_PATT))) {
                 return parseBindFunc(
                     variables
                     , strings
@@ -421,7 +441,7 @@ function _Parser(
                 );
             }
             //or an object literal
-            else if (!!(match = OBJ_PATT.exec(expressionStr))) {
+            else if (!!(match = expressionStr.match(OBJ_PATT))) {
                 return parseObject(
                     variables
                     , strings
@@ -429,15 +449,23 @@ function _Parser(
                 );
             }
             //or regular expressions
-            else if (!!(match = REGEXP_PATT.exec(expressionStr))) {
+            else if (!!(match = expressionStr.match(REGEXP_PATT))) {
                 return parseRegExp(
                     variables
                     , match[1]
                     , match[2]
                 );
             }
+            //see if this has any operators in it
+            else if (expressionStr.match(OPERATOR_PATT)) {
+                return parseOperator(
+                    variables
+                    , strings
+                    , expressionStr
+                );
+            }
             //or a varaible path
-            else if (!!VAR_PATT.exec(expressionStr)) {
+            else if (!!expressionStr.match(VAR_PATT)) {
                 addVariables(
                     variables
                     , expressionStr
@@ -532,7 +560,7 @@ function _Parser(
         , exprNoObjNoArray = expression.replace(
             ARRAY_OBJ_PATT
             , function replaceArray(match, obj) {
-                var name = `<<~~~${++cnt}>>`;
+                var name = `<<${++cnt}>>`;
                 parts[name] = obj;
                 return name;
             }
@@ -668,6 +696,45 @@ function _Parser(
             "type": "concat"
             , "expressions": expressionStr
                 .split(CONCAT_PATT)
+                .map(
+                    parseExpression.bind(
+                        null
+                        , variables
+                        , strings
+                    )
+                )
+        };
+
+        return treeNode;
+    }
+    /**
+    * @function
+    */
+    function parseOperator(variables, strings, expressionStr) {
+        //find the operator with the highest precendent
+        var operator =
+            Object.keys(operatorPrecedence)
+            .find(
+                function findOperator(op) {
+                    var regExp = operatorPrecedence[op];
+                    return expressionStr.match(regExp);
+                }
+            )
+        , opIndex = expressionStr.lastIndexOf(operator)
+        //create the tree node
+        , treeNode = {
+            "type": "operator"
+            , "operator": operator
+            //split the expression by the highest order operator
+            , "expressions":
+                [
+                    expressionStr
+                        .substring(0, opIndex)
+                        .trim()
+                    , expressionStr
+                        .substring(opIndex + operator.length)
+                        .trim()
+                ]
                 .map(
                     parseExpression.bind(
                         null

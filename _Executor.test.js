@@ -1056,17 +1056,31 @@ function expressionExecutorTest15(
                 }
             };
             expressionTree = {
-                "type":"concat"
-                ,"expressions":[
-                    {"type":"variable","path":"app.path.variable"}
-                    ,{"type":"literal","value":"<->"}
-                    ,{"type":"variable","path":"app.title"}
-                ]
-                ,"variables":[
-                    "ref.index"
-                    ,"ref.parent.$every"
-                    ,"ref.parent"
-                    ,"state.title"
+                "type": "operator",
+                "operator": "+",
+                "expressions": [
+                    {
+                        "type": "variable",
+                        "path": "app.path.variable"
+                    },
+                    {
+                        "type": "operator",
+                        "operator": "+",
+                        "expressions": [
+                            {
+                                "type": "literal",
+                                "value": "<->"
+                            },
+                            {
+                                "type": "variable",
+                                "path": "app.title"
+                            }
+                        ]
+                    }
+                ],
+                "variables": [
+                    "app.path.variable",
+                    "app.title"
                 ]
             };
         }
@@ -1086,6 +1100,132 @@ function expressionExecutorTest15(
             test("The result should be true")
             .value(result)
             .equals("screen.path.board-viewport.$show<->my title")
+            ;
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.expression._Executor: operators
+*/
+function expressionExecutorTest16(
+    controller
+    , mock_callback
+) {
+    var expressionExecutor, expressionTree, result, context
+    ;
+
+    arrange(
+        async function arrangeFn() {
+            expressionExecutor = await controller(
+                [
+                    ":PunyJS.expression._Executor"
+                    , [
+
+                    ]
+                ]
+            );
+            context = {
+                "app": {
+                    "var1": 16
+                    , "title": "my title"
+                    , "func": function func(title) {
+                        return title.length;
+                    }
+                }
+            };
+            expressionTree = {
+                "type": "operator",
+                "operator": "-",
+                "expressions": [
+                    {
+                        "type": "operator",
+                        "operator": "+",
+                        "expressions": [
+                            {
+                                "type": "operator",
+                                "operator": "**",
+                                "expressions": [
+                                    {
+                                        "type": "literal",
+                                        "value": 10
+                                    },
+                                    {
+                                        "type": "literal",
+                                        "value": 2
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "operator",
+                                "operator": "%",
+                                "expressions": [
+                                    {
+                                        "type": "operator",
+                                        "operator": "/",
+                                        "expressions": [
+                                            {
+                                                "type": "operator",
+                                                "operator": "*",
+                                                "expressions": [
+                                                    {
+                                                        "type": "literal",
+                                                        "value": 10
+                                                    },
+                                                    {
+                                                        "type": "execution",
+                                                        "path": "app.func",
+                                                        "arguments": [
+                                                            {
+                                                                "type": "variable",
+                                                                "path": "app.title"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "literal",
+                                                "value": 100
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "literal",
+                                        "value": 2
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "variable"
+                        , "path": "app.var1"
+                    }
+                ]
+                , "variables": [
+                    "app.func"
+                    , "app.title"
+                    , "app.var1"
+                ]
+            };
+        }
+    );
+
+    act(
+        function actFn() {
+            result = expressionExecutor(
+                expressionTree
+                , context
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The result should be")
+            .value(result)
+            .equals(84.8)
             ;
         }
     );
