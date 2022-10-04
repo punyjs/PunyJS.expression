@@ -118,6 +118,13 @@ function _Executor(
                     , options
                 );
                 break;
+            case "operator":
+                return handleOperator(
+                    treeNode
+                    , context
+                    , options
+                );
+                break;
             default:
                 throw new Error(
                     `${errors.expression.invalid_expression_type} (${treeNode.type})`
@@ -596,5 +603,57 @@ function _Executor(
         );
 
         return concatedValue;
+    }
+    /**
+    * @function
+    */
+    function handleOperator(treeNode, context, options) {
+        //execute the expressions
+        var resultA = handleType(
+            treeNode.expressions[0]
+            , context
+            , options
+        )
+        , resultB = handleType(
+            treeNode.expressions[1]
+            , context
+            , options
+        );
+        //execute the operator
+        switch(treeNode.operator) {
+            case "**":
+                return resultA ** resultB;
+                break;
+            case "*":
+                return resultA * resultB;
+                break;
+            case "/":
+                return resultA / resultB;
+                break;
+            case "%":
+                return resultA % resultB;
+                break;
+            case "-":
+                return resultA - resultB;
+                break;
+            case "+":
+                if (is_array(resultA)) {
+                    return resultA.concat(resultB);
+                }
+                else if (is_array(resultB)) {
+                    return [resultA].concat(resultB);
+                }
+                return resultA + resultB;
+                break;
+            case "<<":
+                return resultA << resultB;
+                break;
+            case ">>":
+                return resultA >> resultB;
+                break;
+            case ">>>":
+                return resultA >>> resultB;
+                break;
+        }
     }
 }

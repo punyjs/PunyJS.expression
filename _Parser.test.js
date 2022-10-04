@@ -592,7 +592,7 @@ function expressionParserTest14(
                     ]
                 ]
             );
-            expression = "ref.parent[ref.index] +++ '-'+++state.title";
+            expression = "ref.parent[ref.index] + '-'+state.title";
         }
     );
 
@@ -609,14 +609,14 @@ function expressionParserTest14(
             test("expressionTree should be")
             .value(expressionTree)
             .stringify()
-            .equals(`{"type":"concat","expressions":[{"type":"variable","path":"ref.parent[ref.index]"},{"type":"literal","value":"-"},{"type":"variable","path":"state.title"}],"variables":["ref.index","ref.parent.$every","ref.parent","state.title"]}`)
+            .equals(`{"type":"operator","operator":"+","expressions":[{"type":"operator","operator":"+","expressions":[{"type":"variable","path":"ref.parent[ref.index]"},{"type":"literal","value":"-"}]},{"type":"variable","path":"state.title"}],"variables":["ref.index","ref.parent.$every","ref.parent","state.title"]}`)
             ;
         }
     );
 }
 /**
 * @test
-*   @title PunyJS.expression._Parser: strings with
+*   @title PunyJS.expression._Parser: concat strings with other expression patterns in them
 */
 function expressionParserTest15(
     controller
@@ -633,7 +633,7 @@ function expressionParserTest15(
                     ]
                 ]
             );
-            expression = "'func(-1 && b111)' +++ `$show.variable[1].name` +++ ''";
+            expression = "'app.func(-1 && b111)' + `app.variable[1].name` + ''";
         }
     );
 
@@ -650,7 +650,48 @@ function expressionParserTest15(
             test("expressionTree should be")
             .value(expressionTree)
             .stringify()
-            .equals(`{"type":"concat","expressions":[{"type":"literal","value":"func(-1 && b111)"},{"type":"literal","value":"$show.variable[1].name"},{"type":"literal","value":""}],"variables":[]}`)
+            .equals(`{"type":"operator","operator":"+","expressions":[{"type":"operator","operator":"+","expressions":[{"type":"literal","value":"app.func(-1 && b111)"},{"type":"literal","value":"app.variable[1].name"}]},{"type":"literal","value":""}],"variables":[]}`)
+            ;
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.expression._Parser: operators
+*/
+function expressionParserTest16(
+    controller
+) {
+    var expressionParser, expressionTree, expression;
+
+    arrange(
+        async function arrangeFn() {
+            expressionParser = await controller(
+                [
+                    ":PunyJS.expression._Parser"
+                    , [
+
+                    ]
+                ]
+            );
+            expression = "10**2 + 10 * app.func(app.title) / 100% 2 -app.var1";
+        }
+    );
+
+    act(
+        function actFn() {
+            expressionTree = expressionParser(
+                expression
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("expressionTree should be")
+            .value(expressionTree)
+            .stringify()
+            .equals(`{"type":"operator","operator":"-","expressions":[{"type":"operator","operator":"+","expressions":[{"type":"operator","operator":"**","expressions":[{"type":"literal","value":10},{"type":"literal","value":2}]},{"type":"operator","operator":"%","expressions":[{"type":"operator","operator":"/","expressions":[{"type":"operator","operator":"*","expressions":[{"type":"literal","value":10},{"type":"execution","path":"app.func","arguments":[{"type":"variable","path":"app.title"}]}]},{"type":"literal","value":100}]},{"type":"literal","value":2}]}]},{"type":"variable","path":"app.var1"}],"variables":["app.func","app.title","app.var1"]}`)
             ;
         }
     );

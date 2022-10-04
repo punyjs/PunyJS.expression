@@ -2,13 +2,13 @@
 * @test
 *   @title PunyJS.expression: functional test
 */
-function expressionFunctionalTest(
+function expressionFunctionalTest1(
     controller
     , mock_callback
 ) {
     var createExpression, state
     , expression1, expression2, expression3, expression4
-    , result1, result2
+    , result1, result2, result3
     ;
 
     arrange(
@@ -36,16 +36,23 @@ function expressionFunctionalTest(
     act(
         function actFn() {
             expression1 = createExpression(
-                "'Do you like '+++ path1.value1 +++' '+++ path1.value2 +++'?'"
+                "'Do you like '+ path1.value1 +' '+ path1.value2 +'?'"
             );
             result1 = expression1.execute(
                 state
             );
 
             expression2 = createExpression(
-                "path2.num1 +++ path2.array1 +++ 'b111' +++path2.num2 +++ path2.array2"
+                "path2.num1 + path2.array1 + 'b111' +path2.num2 + path2.array2"
             );
             result2 = expression2.execute(
+                state
+            );
+
+            expression3 = createExpression(
+                "path2.num2 ** path2.array1[2] + path2.array1[0] / path2.array2[path2.num1] + path1.value2"
+            );
+            result3 = expression3.execute(
                 state
             );
         }
@@ -62,6 +69,11 @@ function expressionFunctionalTest(
             .value(result2)
             .stringify()
             .equals('[0,1,2,3,"b111",4,5,6,7]')
+            ;
+
+            test("result3 should be")
+            .value(result3)
+            .equals("64.2Foo")
             ;
         }
     );
