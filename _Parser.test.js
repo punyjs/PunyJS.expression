@@ -696,3 +696,44 @@ function expressionParserTest16(
         }
     );
 }
+/**
+* @test
+*   @title PunyJS.expression._Parser: conditional with string
+*/
+function expressionParserTest17(
+    controller
+) {
+    var expressionParser, expressionTree, expression;
+
+    arrange(
+        async function arrangeFn() {
+            expressionParser = await controller(
+                [
+                    ":PunyJS.expression._Parser"
+                    , [
+
+                    ]
+                ]
+            );
+            expression = "_myvar === 'test'";
+        }
+    );
+
+    act(
+        function actFn() {
+            expressionTree = expressionParser(
+                expression
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("expressionTree should be")
+            .value(expressionTree)
+            .stringify()
+            .equals(`{"type":"conditional","sideA":{"type":"variable","path":"_myvar"},"operator":"===","sideB":{"type":"literal","value":"test"},"variables":["_myvar"]}`)
+            ;
+        }
+    );
+}

@@ -99,7 +99,7 @@ function _Parser(
     * A regular expression pattern to match conditional expressions
     * @property
     */
-    , COND_PATT =  /^([\-A-Za-z0-9$.,()\[\]_\ '"`]+) (is|!is|isin|!isin|==|>|<|!=|>=|<=|!==|===) ([A-z0-9$.,()\[\]_\\ \/\-'"`]+|(?<!\/)\/.+(?<!\/)\/[gimyusd]+)$/i
+    , COND_PATT =  /^([\-A-Za-z0-9$.,()\[\]_\ '"`]+) (is|!is|isin|!isin|==|>|<|!=|>=|<=|!==|===) ([A-z0-9$.,()\[\]_\\ \/\-'"`]+|(?<!\/)\/.+(?<!\/)\/[gimyusd]+|"<[0-9]>")$/i
     /**
     * A regular expression pattern to match iterator expressions
     * @property
