@@ -715,7 +715,7 @@ function expressionParserTest17(
                     ]
                 ]
             );
-            expression = "_myvar === 'test'";
+            expression = "_myvar === 'test' || _myvar isin ['prod','dev']";
         }
     );
 
@@ -732,7 +732,7 @@ function expressionParserTest17(
             test("expressionTree should be")
             .value(expressionTree)
             .stringify()
-            .equals(`{"type":"conditional","sideA":{"type":"variable","path":"_myvar"},"operator":"===","sideB":{"type":"literal","value":"test"},"variables":["_myvar"]}`)
+            .equals(`{"type":"chain","sections":[{"type":"conditional","sideA":{"type":"variable","path":"_myvar"},"operator":"===","sideB":{"type":"literal","value":"test"}},{"type":"logical","value":"||"},{"type":"conditional","sideA":{"type":"variable","path":"_myvar"},"operator":"isin","sideB":{"type":"array","members":[{"type":"literal","value":"prod"},{"type":"literal","value":"dev"}]}}],"variables":["_myvar"]}`)
             ;
         }
     );
