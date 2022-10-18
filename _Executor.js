@@ -438,9 +438,9 @@ function _Executor(
             , context
         );
         if (!ref.found) {
-            //if this is a quiet fail then return an empty string
+            //if this is a quiet fail then return undefined
             if (!!options && options.quiet === true) {
-                return "";
+                return undefined;
             }
             throw new Error(
                 `${errors.expression.variable_not_found} ("${treeNode.path}")`
