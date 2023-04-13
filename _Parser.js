@@ -189,23 +189,40 @@ function _Parser(
         //remove string literals so we don't match anything in their contents
         , strippedExpressionStr = expressionStr.replace(
             STRING_PATT
-            , function removeStrings(match, value1, value2, value3, value4) {
-                var value = !is_nill(value1)
-                    ? value1
-                    : !is_nill(value2)
-                        ? value2
-                        : !is_nill(value3)
-                            ? value3
-                            : null
-                , index = strings.length;
-                strings.push(
-                    value
-                );
-                return `"<${index}>"`;
-            }
-        )
-        , exprTree
+            , removeStrings.bind(
+                null
+                , strings
+            )
+        );
+        return parse(
+            variables
+            , strings
+            , strippedExpressionStr
+        );
+    }
+
+    /**
+    * @function
+    */
+    function removeStrings(strings, match, value1, value2, value3, value4) {
+        var value = !is_nill(value1)
+            ? value1
+            : !is_nill(value2)
+                ? value2
+                : !is_nill(value3)
+                    ? value3
+                    : null
+        , index = strings.length
         ;
+        strings.push(
+            value
+        );
+        return `"<${index}>"`;
+    }
+    /**
+    * @function
+    */
+    function parse(variables, strings, strippedExpressionStr) {
         //first step is to split any "||" or "&&"
         if (strippedExpressionStr.match(HAS_AND_OR_PATT)) {
             exprTree = splitLogical(
@@ -227,7 +244,6 @@ function _Parser(
 
         return exprTree;
     }
-
     /**
     * @function
     */
@@ -630,7 +646,7 @@ function _Parser(
                     : value
                 , expr
                 ;
-                expr = parseExpression(
+                expr = parse(
                     variables
                     , strings
                     , propValue

@@ -737,3 +737,44 @@ function expressionParserTest17(
         }
     );
 }
+/**
+* @test
+*   @title PunyJS.expression._Parser: object expression
+*/
+function expressionParserTest18(
+    controller
+) {
+    var expressionParser, expressionTree, expression;
+
+    arrange(
+        async function arrangeFn() {
+            expressionParser = await controller(
+                [
+                    ":PunyJS.expression._Parser"
+                    , [
+
+                    ]
+                ]
+            );
+            expression = '{"undefined":"_isBranch && _isToggled","true":"_isBranch && !_isToggled"}';
+        }
+    );
+
+    act(
+        function actFn() {
+            expressionTree = expressionParser(
+                expression
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The expression tree should be")
+            .value(expressionTree)
+            .stringify()
+            .equals('{"type":"object","properties":{"undefined":{"type":"chain","sections":[{"type":"variable","path":"_isBranch"},{"type":"logical","value":"&&"},{"type":"variable","path":"_isToggled"}],"variables":["_isBranch","_isToggled"]},"true":{"type":"chain","sections":[{"type":"variable","path":"_isBranch"},{"type":"logical","value":"&&"},{"type":"not","not":"!","expression":{"type":"variable","path":"_isToggled"}}],"variables":{"$$ref$$":"$.properties.undefined.variables"}}},"variables":{"$$ref$$":"$.properties.undefined.variables"}}')
+            ;
+        }
+    );
+}
