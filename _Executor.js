@@ -477,7 +477,7 @@ function _Executor(
             );
         }
         //execute the function
-        return fn.apply(null, args);
+        return fn.apply(fnRef.parent, args);
     }
     /**
     * @function
