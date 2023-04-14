@@ -223,6 +223,7 @@ function _Parser(
     * @function
     */
     function parse(variables, strings, strippedExpressionStr) {
+        var exprTree;
         //first step is to split any "||" or "&&"
         if (strippedExpressionStr.match(HAS_AND_OR_PATT)) {
             exprTree = splitLogical(
