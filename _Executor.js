@@ -136,45 +136,71 @@ function _Executor(
     * @function
     */
     function handleChain(treeNode, context, options) {
-        var lastResult, hasResult = false, operator;
-        //loop through the sections
-        treeNode.sections
-        .every(
-            function forEachSection(section) {
-                var result;
-                if (section.type === "logical") {
-                    operator = section.value;
-                    return true;
-                }
-                //if there is an OR operator, check the result
-                if (hasResult && !!lastResult && operator === "||") {
-                    //if the result is truthy then stop the loop
-                    return false;
-                }
-                else {
-                    result = handleType(
-                        section
-                        , context
-                        , options
-                    );
-                    hasResult = true;
-                }
-                if (!!operator) {
-                    if (operator === "&&") {
-                        lastResult = lastResult && result;
-                    }
-                    else {
-                        lastResult = result;
-                    }
-                }
-                else {
-                    lastResult = result;
-                }
-                return true;
+        var sections = treeNode.sections
+        , operator
+        , result
+        , lastResult
+        ;
+        //loop through
+        for (
+            let i = 0
+                , len = sections.length
+                , last = len - 1;
+            i < len;
+            i = i + 2
+         ) {
+            //get the result for this section
+            result = handleType(
+                sections[i]
+                , context
+                , options
+            );
+            //is this the last in the chain
+            if (i === last) {
+                return result;
             }
-        );
+            //get the operator
+            operator = sections[i + 1];
+            //if the result is truthy and the op is OR then we're done
+            if (!!result && operator.value === "||") {
+                return result;
+            }
+            //if the result is falsey and the op is AND
+            if (!result && operator.value === "&&") {
+                //find the next or
+                nextORIndex = sections.findIndex(
+                    findNextORIndex.bind(
+                        null
+                        , i
+                    )
+                );
+                //if there is an OR then continue
+                if (nextORIndex !== -1) {
+                    i = nextORIndex - 1;
+                    continue;
+                }
+                //otherwize we're done
+                else {
+                    return lastResult;
+                }
+            }
+            //set the last result
+            lastResult = result;
+        }
 
         return lastResult;
+    }
+    /**
+    * @function
+    */
+    function findNextORIndex(curIndex, section, index) {
+        if (index < curIndex) {
+             return false;
+        }
+        if (section.value === "||") {
+            return true;
+        }
+        return false;
     }
     /**
     * @function
