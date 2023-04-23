@@ -1230,3 +1230,229 @@ function expressionExecutorTest16(
         }
     );
 }
+/**
+* @test
+*   @title PunyJS.expression._Executor: chain regression AND OR
+*/
+function expressionExecutorTest17(
+    controller
+    , mock_callback
+) {
+    var expressionExecutor, expressionTree, result, context
+    ;
+
+    arrange(
+        async function arrangeFn() {
+            expressionExecutor = await controller(
+                [
+                    ":PunyJS.expression._Executor"
+                    , [
+
+                    ]
+                ]
+            );
+            context = {
+                "app": {
+                    "var1": 16
+                    , "title": "my title"
+                    , "func1": function func1(title) {
+                        return title.length;
+                    }
+                    , "func2": function func2(title) {
+                        return title.length;
+                    }
+                }
+            };
+            expressionTree = {
+                "type": "chain"
+                , "sections": [
+                    {
+                        "type": "conditional"
+                        , "sideA": {
+                            "type": "variable"
+                            , "path": "app.var1"
+                        }
+                        , "operator": "==="
+                        , "sideB": {
+                            "type": "literal"
+                            , "value": 12
+                        }
+                    }
+                    , {
+                        "type": "logical"
+                        , "value": "&&"
+                    }
+                    , {
+                        "type": "execution"
+                        , "path": "app.func"
+                        , "arguments": [
+                            {
+                                "type": "variable"
+                                , "path": "app.title"
+                            }
+                        ]
+                    }
+                    , {
+                        "type": "logical"
+                        , "value": "||"
+                    }
+                    , {
+                        "type": "execution"
+                        , "path": "app.func2"
+                        , "arguments": [
+                            {
+                                "type": "literal"
+                                , "value": "title"
+                            }
+                        ]
+                    }
+                ]
+                , "variables": [
+                    "app.func1"
+                    , "app.func2"
+                    , "app.var1"
+                    , "app.title"
+                ]
+            };
+        }
+    );
+
+    act(
+        function actFn() {
+            result = expressionExecutor(
+                expressionTree
+                , context
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("the result should be")
+            .value(result)
+            .equals(5)
+            ;
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.expression._Executor: chain regression AND AND OR
+*/
+function expressionExecutorTest18(
+    controller
+    , mock_callback
+) {
+    var expressionExecutor, expressionTree, result, context
+    ;
+
+    arrange(
+        async function arrangeFn() {
+            expressionExecutor = await controller(
+                [
+                    ":PunyJS.expression._Executor"
+                    , [
+
+                    ]
+                ]
+            );
+            context = {
+                "app": {
+                    "var1": 16
+                    , "title": "my title"
+                    , "func1": function func1(title) {
+                        return title.length;
+                    }
+                    , "func2": function func2(title) {
+                        return title.length;
+                    }
+                }
+            };
+            expressionTree = {
+                "type": "chain"
+                , "sections": [
+                    {
+                        "type": "conditional"
+                        , "sideA": {
+                            "type": "variable"
+                            , "path": "app.var1"
+                        }
+                        , "operator": "==="
+                        , "sideB": {
+                            "type": "literal"
+                            , "value": 12
+                        }
+                    }
+                    , {
+                        "type": "logical"
+                        , "value": "&&"
+                    }
+                    , {
+                        "type": "conditional"
+                        , "sideA": {
+                            "type": "variable"
+                            , "path": "app.var1"
+                        }
+                        , "operator": "!=="
+                        , "sideB": {
+                            "type": "literal"
+                            , "value": 16
+                        }
+                    }
+                    , {
+                        "type": "logical"
+                        , "value": "&&"
+                    }
+                    , {
+                        "type": "execution"
+                        , "path": "app.func"
+                        , "arguments": [
+                            {
+                                "type": "variable"
+                                , "path": "app.title"
+                            }
+                        ]
+                    }
+                    , {
+                        "type": "logical"
+                        , "value": "||"
+                    }
+                    , {
+                        "type": "execution"
+                        , "path": "app.func2"
+                        , "arguments": [
+                            {
+                                "type": "literal"
+                                , "value": "title"
+                            }
+                        ]
+                    }
+                ]
+                , "variables": [
+                    "app.func1"
+                    , "app.func2"
+                    , "app.var1"
+                    , "app.title"
+                ]
+            };
+        }
+    );
+
+    act(
+        function actFn() {
+            result = expressionExecutor(
+                expressionTree
+                , context
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("the result should be")
+            .value(result)
+            .equals(5)
+            ;
+        }
+    );
+}

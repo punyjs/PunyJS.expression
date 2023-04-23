@@ -139,7 +139,7 @@ function _Executor(
         var sections = treeNode.sections
         , operator
         , result
-        , lastResult
+        , lastResult, nextORIndex
         ;
         //loop through
         for (
