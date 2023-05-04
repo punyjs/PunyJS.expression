@@ -778,3 +778,44 @@ function expressionParserTest18(
         }
     );
 }
+/**
+* @test
+*   @title PunyJS.expression._Parser: regression, variable with indexer
+*/
+function expressionParserTest19(
+    controller
+) {
+    var expressionParser, expressionTree, expression;
+
+    arrange(
+        async function arrangeFn() {
+            expressionParser = await controller(
+                [
+                    ":PunyJS.expression._Parser"
+                    , [
+
+                    ]
+                ]
+            );
+            expression = "context['name']";
+        }
+    );
+
+    act(
+        function actFn() {
+            expressionTree = expressionParser(
+                expression
+            );
+        }
+    );
+
+    assert(
+        function assertFn(test) {
+            test("The expression tree should be")
+            .value(expressionTree)
+            .stringify()
+            .equals('{"type":"variable","path":"context[\\"<0>\\"]","variables":["context[\\"<0>\\"]"]}')
+            ;
+        }
+    );
+}

@@ -144,7 +144,7 @@ function _Parser(
     * A regular expression pattern to test for a variable path
     * @property
     */
-    , VAR_PATT = /^[A-z0-9._$\[\]"'`]+$/
+    , VAR_PATT = /^[A-z0-9._$\[\]"'`\<\>]+$/
     /**
     * A regular expression pattern to replace array or oject patterns
     * @property
