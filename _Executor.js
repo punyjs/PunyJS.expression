@@ -304,16 +304,27 @@ function _Executor(
         , step = is_numeric(treeNode.step)
             ? parseInt(treeNode.step)
             : 1
-        , coll = filterCollection(
-            set
-            , filter
-            , treeNode.lookup
-            , context
-            , options
-        )
-        , keys = Object.keys(coll)
+        , coll = !!set
+            && filterCollection(
+                set
+                , filter
+                , treeNode.lookup
+                , context
+                , options
+            )
+        , keys = !!coll
+            && Object.keys(coll)
         , indx = 0
         ;
+        //if there isn't a collection then throw an error
+        if (!coll) {
+            if (options?.quiet === true) {
+                return undefined;
+            }
+            throw new Error(
+                `${errors.expression.invalid_iterator_collection} ("${treeNode.collection.path}")`
+            );
+        }
         //sort if we have a sort
         if (!!sort) {
             keys.sort(
@@ -380,6 +391,12 @@ function _Executor(
                         indx+=step;
                         return data;
                     }
+                }
+            }
+            , "reset": {
+                "enumerable": true
+                , "value": function reset() {
+                    indx = 0;
                 }
             }
         });

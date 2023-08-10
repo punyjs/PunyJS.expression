@@ -8,5 +8,6 @@
         , "bind_function_invalid": "[Bind Function Invalid] The bind operation requires a function."
         , "bind_function_not_found": "[Bind Function not Found] The bind function was not found."
         , "invalid_expression": "[Invalid Expression] The expression does not fit any expression patterns."
+        , "invalid_iterator_collection": "[Invalid Iterator Collection] The iterator collection must be an object or an array"
     }
 }

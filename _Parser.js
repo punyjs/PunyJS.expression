@@ -104,7 +104,7 @@ function _Parser(
     * A regular expression pattern to match iterator expressions
     * @property
     */
-    , ITER_PATT = /^([A-Za-z0-9$_]+)(?:, ?([A-Za-z0-9$_]+))?(?:, ?([A-Za-z0-9$_]+))? (in|for) (.+)(?: sort ([A-z0-9$._\[\]]+)(?: (desc|asc))?)?(?: filter (.+))?$/i
+    , ITER_PATT = /^([A-Za-z0-9$_]+)(?:, ?([A-Za-z0-9$_]+))?(?:, ?([A-Za-z0-9$_]+))? (in|for) (.+?)(?: sort ([A-z0-9$._\[\]]+)(?: (desc|asc))?)?(?: filter (.+))?$/i
     /**
     * A regular expression pattern to match literal expressions
     * @property
@@ -385,10 +385,10 @@ function _Parser(
             )
         };
         if (!!match[2]) {
-            treeNode.lookup.value = match[2];
+            treeNode.lookup.index = match[2];
         }
         if (!!match[3]) {
-            treeNode.lookup.index = match[3];
+            treeNode.lookup.value = match[3];
         }
         if (!!match[6]) {
             treeNode.sort = {
@@ -398,9 +398,9 @@ function _Parser(
         }
         if (!!match[8]) {
             treeNode.filter = parseExpression(
-                match[8]
+                variables
                 , strings
-                , context
+                , match[8]
             );
         }
         if (!!match[9]) {
