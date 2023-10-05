@@ -121,6 +121,11 @@ function _Parser(
     */
     , STRING_PLACEHOLDER_PATT = /(?<![<\\])[<]([0-9]+)(?<![<\\])[>]/
     /**
+    * A regular expression pattern to match string literal placeholders
+    * @property
+    */
+    , OBJ_ARRAY_PLACEHOLDER_PATT = /(?<![<\\])[<]{2}([0-9]+)(?<![<\\])[>]{2}/
+    /**
     * A regular expression pattern to split the concat expression
     * @property
     */
@@ -589,9 +594,12 @@ function _Parser(
         .map(
             function mapArgs(arg) {
                 arg = arg.trim();
-                if (parts.hasOwnProperty(arg)) {
-                    return parts[arg];
-                }
+                arg = arg.replace(
+                    OBJ_ARRAY_PLACEHOLDER_PATT
+                    , function replacePlacholder(match) {
+                        return parts[match];
+                    }
+                );
                 return arg;
             }
         );
